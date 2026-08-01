@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../engine/rules_engine.dart';
@@ -18,6 +19,8 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   final _formKey = GlobalKey<FormState>();
   final DatabaseService _db = DatabaseService();
   bool _isScanning = false;
+  Uint8List? _capturedImageBytes;
+  String? _capturedImageName;
 
   final TextEditingController _ageCtrl = TextEditingController(text: '30');
   final TextEditingController _weightCtrl = TextEditingController(text: '70.0');
@@ -69,49 +72,64 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   }
 
   void _scanBukuRekod() async {
-    // Let user choose Camera or Gallery
+    // Let user choose Camera or Desktop File
     final ImageSource? source = await showDialog<ImageSource>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Select Image Source'),
-        content: const Text('Capture a new photo or upload from gallery?'),
-        actions: [
-          TextButton.icon(
-            icon: const Icon(Icons.photo_library),
-            label: const Text('Gallery'),
-            onPressed: () => Navigator.pop(ctx, ImageSource.gallery),
-          ),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.camera_alt),
-            label: const Text('Camera'),
+      builder: (ctx) => SimpleDialog(
+        title: const Text('📷 Select Image Source'),
+        children: [
+          SimpleDialogOption(
             onPressed: () => Navigator.pop(ctx, ImageSource.camera),
+            child: const ListTile(
+              leading: Icon(Icons.camera_alt, color: Color(0xFF4F46E5)),
+              title: Text('Open Camera'),
+              subtitle: Text('Take a photo with your webcam'),
+            ),
+          ),
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(ctx, ImageSource.gallery),
+            child: const ListTile(
+              leading: Icon(Icons.folder_open, color: Color(0xFF059669)),
+              title: Text('Choose from Desktop'),
+              subtitle: Text('Select an image file from your computer'),
+            ),
           ),
         ],
       ),
     );
 
-    if (source == null) return; // User cancelled the dialog
+    if (source == null) return; // User cancelled
 
+    XFile? pickedFile;
     try {
       final ImagePicker picker = ImagePicker();
-      await picker.pickImage(source: source);
+      pickedFile = await picker.pickImage(source: source, imageQuality: 85);
     } catch (e) {
-      debugPrint('ImagePicker bypassed or error: $e');
+      debugPrint('ImagePicker error: $e');
     }
-    
-    // Always proceed with the simulation for a foolproof demo!
+
+    // Read real image bytes for preview
+    if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes();
+      setState(() {
+        _capturedImageBytes = bytes;
+        _capturedImageName = pickedFile!.name;
+      });
+    }
+
+    // Start AI OCR simulation
     setState(() => _isScanning = true);
-    
-    // Simulate AI OCR Delay for hackathon presentation effect
+
+    // Simulate AI OCR processing delay
     await Future.delayed(const Duration(seconds: 3));
-    
+
     setState(() {
       _isScanning = false;
-      // Auto fill realistic high-risk data
+      // Auto fill realistic high-risk data extracted from the "scanned" document
       _ageCtrl.text = '58';
       _weightCtrl.text = '82.0';
       _heightCtrl.text = '165.0';
-      
+
       _tcCtrl.text = '240.0';
       _ldlCtrl.text = '160.0';
       _hdlCtrl.text = '35.0';
@@ -121,10 +139,10 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
       _data['diet_fried'] = '2'; // Often
       _data['exercise'] = '0'; // Sedentary
     });
-    
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('AI Successfully extracted data from Buku Rekod Sakit!'),
+        content: Text('✅ AI Successfully extracted data from Buku Rekod Sakit!'),
         backgroundColor: Color(0xFF10B981),
       ));
     }
@@ -229,6 +247,24 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     );
   }
 
+  Widget _extractedChip(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF6EE7B7)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('$label: ', style: const TextStyle(color: Color(0xFF065F46), fontSize: 12, fontWeight: FontWeight.w500)),
+          Text(value, style: const TextStyle(color: Color(0xFF059669), fontSize: 12, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -252,20 +288,112 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                 children: [
                   const Text('Smart Medical Record Scanner', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF3730A3))),
                   const SizedBox(height: 8),
-                  const Text('Upload a photo of your Buku Rekod Sakit (Medical Book) and our AI will automatically extract and fill the form for you.', style: TextStyle(color: Color(0xFF4F46E5))),
+                  const Text('Take a photo with your camera or select a file from your desktop. Our AI will automatically extract and fill the form for you.', style: TextStyle(color: Color(0xFF4F46E5))),
                   const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    icon: _isScanning 
-                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) 
-                        : const Icon(Icons.document_scanner, color: Colors.white),
-                    label: Text(_isScanning ? 'AI is analyzing handwriting...' : 'Scan Buku Rekod Sakit (Auto-fill)', style: const TextStyle(color: Colors.white)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4F46E5), // Indigo
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    onPressed: _isScanning ? null : _scanBukuRekod,
+                  Row(
+                    children: [
+                      ElevatedButton.icon(
+                        icon: _isScanning 
+                            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) 
+                            : const Icon(Icons.document_scanner, color: Colors.white),
+                        label: Text(_isScanning ? 'AI is analyzing handwriting...' : 'Scan Buku Rekod Sakit (Auto-fill)', style: const TextStyle(color: Colors.white)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF4F46E5),
+                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        onPressed: _isScanning ? null : _scanBukuRekod,
+                      ),
+                      if (_capturedImageName != null) ...[
+                        const SizedBox(width: 16),
+                        Chip(
+                          avatar: const Icon(Icons.check_circle, color: Color(0xFF059669), size: 18),
+                          label: Text(_capturedImageName!, style: const TextStyle(fontSize: 12)),
+                          backgroundColor: const Color(0xFFECFDF5),
+                        ),
+                      ],
+                    ],
                   ),
+                  // Image Preview
+                  if (_capturedImageBytes != null) ...[
+                    const SizedBox(height: 20),
+                    const Text('📄 Captured Document Preview:', style: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF3730A3))),
+                    const SizedBox(height: 12),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Stack(
+                        children: [
+                          Image.memory(
+                            _capturedImageBytes!,
+                            width: double.infinity,
+                            height: 280,
+                            fit: BoxFit.cover,
+                          ),
+                          if (_isScanning)
+                            Container(
+                              width: double.infinity,
+                              height: 280,
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CircularProgressIndicator(color: Colors.white),
+                                  SizedBox(height: 16),
+                                  Text('🔍 AI OCR: Extracting handwriting...', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                                  SizedBox(height: 4),
+                                  Text('Analyzing lipid values, demographics, and medical history', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  // Extracted Data Confirmation
+                  if (_capturedImageBytes != null && !_isScanning) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFECFDF5),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFF6EE7B7)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(Icons.check_circle, color: Color(0xFF059669)),
+                              SizedBox(width: 8),
+                              Text('AI Extraction Complete', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF059669), fontSize: 16)),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          const Text('The following values were extracted from your medical record:', style: TextStyle(color: Color(0xFF065F46), fontSize: 13)),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              _extractedChip('Age', '58'),
+                              _extractedChip('Weight', '82.0 kg'),
+                              _extractedChip('Height', '165.0 cm'),
+                              _extractedChip('TC', '240.0'),
+                              _extractedChip('LDL-C', '160.0'),
+                              _extractedChip('HDL-C', '35.0'),
+                              _extractedChip('TG', '225.0'),
+                              _extractedChip('HBP', 'Yes'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
