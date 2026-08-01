@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LipidWise AI | 2026 ACC/AHA Dyslipidemia System</title>
+    <meta name="description" content="An AI-based dyslipidemia prevention system for early risk awareness, lipid result explanation, and personalized lifestyle coaching.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Floating Disclaimer -->
+        <div class="disclaimer-banner">
+            <i class="fas fa-info-circle"></i> 
+            <strong>Disclaimer:</strong> This app does not diagnose disease or replace a doctor. It helps understand risk factors, explain results, and encourage healthy choices.
+        </div>
+
+        <header class="app-header">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-heartbeat"></i></div>
+                <h1>LipidWise <span>AI</span></h1>
+                <span class="guideline-badge"><i class="fas fa-certificate"></i> 2026 ACC/AHA Guideline Aligned</span>
+            </div>
+            <div class="header-actions">
+                <span id="user-profile-badge" class="user-badge hidden"></span>
+                <button id="role-switch-btn" class="btn outline-btn hidden" onclick="location.reload()"><i class="fas fa-user-gear"></i> Change Role</button>
+                <button id="theme-toggle" class="icon-btn" aria-label="Toggle Theme"><i class="fas fa-moon"></i></button>
+            </div>
+        </header>
+
+        <main class="main-content">
+
+            <!-- Welcome Screen / Role Selection (Flowchart Step 1 & 2) -->
+            <section id="welcome-screen" class="card welcome-card">
+                <div class="welcome-header text-center">
+                    <div class="hero-icon"><i class="fas fa-shield-heart"></i></div>
+                    <h2>Welcome to LipidWise AI</h2>
+                    <p class="subtitle">Next-Gen Preventive Dyslipidemia & ASCVD Risk Awareness System</p>
+                </div>
+
+                <div class="role-grid mt-l">
+                    <!-- Role 1: General User / Patient -->
+                    <div class="role-card">
+                        <div class="role-icon patient-icon"><i class="fas fa-user-astronaut"></i></div>
+                        <h3>General User / Potential Patient</h3>
+                        <p>Complete a quick health & lipid assessment, receive PREVENT™ 10-year risk calculation, personalized food swaps, and AI health report.</p>
+                        
+                        <div class="auth-action mt-m">
+                            <button id="google-signin-patient" class="btn google-btn full-width">
+                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo" class="google-icon">
+                                Sign in with Google (Patient)
+                            </button>
+                            <button id="guest-continue-patient" class="btn text-btn full-width mt-xs">Continue as Guest <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Role 2: Doctor / Admin -->
+                    <div class="role-card doctor-role">
+                        <div class="role-icon doctor-icon"><i class="fas fa-user-md"></i></div>
+                        <h3>Doctor / Healthcare Provider</h3>
+                        <p>Access doctor portal, review patient risk list, inspect 2026 ACC/AHA guidelines summary, and add clinician follow-up notes.</p>
+                        
+                        <div class="auth-action mt-m">
+                            <button id="google-signin-doctor" class="btn google-doctor-btn full-width">
+                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo" class="google-icon">
+                                Sign in with Google (Doctor)
+                            </button>
+                            <button id="demo-doctor-btn" class="btn outline-btn full-width mt-xs"><i class="fas fa-stethoscope"></i> Doctor Portal Demo</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Doctor / Admin Dashboard View (Flowchart Path 2) -->
+            <section id="doctor-dashboard" class="hidden">
+                <div class="dashboard-header">
+                    <h2><i class="fas fa-user-doctor"></i> Doctor / Admin Clinical Portal</h2>
+                    <span class="badge status-pill status-ideal">Active Clinician Mode</span>
+                </div>
+
+                <!-- Patient List Table -->
+                <div class="card mt-m">
+                    <div class="card-header-flex">
+                        <h3><i class="fas fa-users"></i> Patient Screening Registry</h3>
+                        <input type="text" id="patient-search" placeholder="Search patient name or risk..." class="search-input">
+                    </div>
+                    <div class="lipid-table-responsive mt-s">
+                        <table class="lipid-table">
+                            <thead>
+                                <tr>
+                                    <th>Patient Name</th>
+                                    <th>Age/Sex</th>
+                                    <th>PREVENT 10-Yr Risk</th>
+                                    <th>Lp(a) Status</th>
+                                    <th>Risk Severity</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="doctor-patient-table">
+                                <!-- Injected by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Selected Patient Detail Modal / Section -->
+                <div id="doctor-patient-modal" class="card mt-m hidden">
+                    <div class="dashboard-header">
+                        <h3><i class="fas fa-id-card"></i> Clinical Patient Detail Report: <span id="doc-pt-name">Alex Smith</span></h3>
+                        <button class="btn secondary-btn" onclick="document.getElementById('doctor-patient-modal').classList.add('hidden')">Close Inspector</button>
+                    </div>
+
+                    <div class="guideline-grid mt-m">
+                        <div class="guideline-card">
+                            <h4>AI Summary of Patient Risk</h4>
+                            <p id="doc-pt-ai-summary" class="text-sm">Patient shows elevated Non-HDL-C (165 mg/dL) and 10-year PREVENT risk score of 5.8%. 2026 ACC/AHA guidelines suggest statin initiation or dose intensification.</p>
+                        </div>
+                        <div class="guideline-card">
+                            <h4>Review Lifestyle & Lipid Data</h4>
+                            <p id="doc-pt-lipid-review" class="text-sm">TC: 215, LDL: 140, HDL: 50, TG: 150 mg/dL. Lp(a): 135 nmol/L (HIGH ≥125).</p>
+                        </div>
+                    </div>
+
+                    <!-- Doctor Notes / Follow-Up Recommendation -->
+                    <div class="doctor-notes-box mt-m">
+                        <label for="doctor-notes-input"><strong><i class="fas fa-pen-to-square"></i> Doctor Notes & Follow-Up Recommendation:</strong></label>
+                        <textarea id="doctor-notes-input" rows="4" placeholder="Enter clinical recommendations, statin prescription adjustments, or lifestyle orders..."></textarea>
+                        <button id="save-doctor-notes-btn" class="btn primary-btn mt-s"><i class="fas fa-save"></i> Save Doctor Notes</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Progress Tracker for Assessment Form -->
+            <div class="progress-container hidden" id="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+                <div class="steps-indicator">
+                    <div class="step active" data-step="1">1</div>
+                    <div class="step" data-step="2">2</div>
+                    <div class="step" data-step="3">3</div>
+                    <div class="step" data-step="4">4</div>
+                    <div class="step" data-step="5">5</div>
+                </div>
+            </div>
+
+            <!-- Form Section -->
+            <section id="assessment-form" class="card form-card hidden">
+                <form id="lipid-form">
+                    
+                    <!-- Step 1: Emergency & Warning Signs -->
+                    <div class="form-step active" id="step-1">
+                        <h2><i class="fas fa-exclamation-triangle warning-icon"></i> Emergency & Warning Signs</h2>
+                        <p class="subtitle">Please check any symptoms you are currently experiencing.</p>
+                        
+                        <div class="checkbox-grid">
+                            <label class="custom-checkbox danger-check">
+                                <input type="checkbox" name="symptom_chest_pain" value="yes">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Chest pain or discomfort</span>
+                            </label>
+                            <label class="custom-checkbox danger-check">
+                                <input type="checkbox" name="symptom_stroke" value="yes">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Face drooping, arm weakness, trouble speaking (Stroke signs)</span>
+                            </label>
+                            <label class="custom-checkbox danger-check">
+                                <input type="checkbox" name="symptom_sob" value="yes">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Severe shortness of breath</span>
+                            </label>
+                            <label class="custom-checkbox danger-check">
+                                <input type="checkbox" name="symptom_abdomen" value="yes">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Severe upper abdominal pain / nausea</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="symptom_eyes" value="yes">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Yellowish patches around eyelids (Xanthelasma)</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="symptom_skin" value="yes">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Fatty lumps on skin or tendons (Xanthomas)</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="symptom_none" id="symptom_none" value="yes">
+                                <span class="checkmark"></span>
+                                <span class="check-text">None of the above</span>
+                            </label>
+                        </div>
+                        
+                        <div id="emergency-alert" class="alert danger-alert hidden">
+                            <i class="fas fa-ambulance"></i>
+                            <div>
+                                <strong>EMERGENCY WARNING</strong>
+                                <p>Your symptoms may be urgent. Please seek emergency medical care immediately.</p>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn primary-btn next-btn" data-next="2">Next Step <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Basic Body Data -->
+                    <div class="form-step" id="step-2">
+                        <h2><i class="fas fa-user"></i> Basic Body Profile</h2>
+                        <p class="subtitle">Help us understand your baseline metrics.</p>
+
+                        <div class="input-grid">
+                            <div class="input-group">
+                                <label for="age">Age (Years)</label>
+                                <input type="number" id="age" name="age" min="18" max="120" required placeholder="e.g. 45">
+                            </div>
+                            <div class="input-group">
+                                <label for="sex">Biological Sex</label>
+                                <select id="sex" name="sex" required>
+                                    <option value="" disabled selected>Select...</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="height">Height (cm)</label>
+                                <input type="number" id="height" name="height" min="100" max="250" required placeholder="e.g. 170">
+                            </div>
+                            <div class="input-group">
+                                <label for="weight">Weight (kg)</label>
+                                <input type="number" id="weight" name="weight" min="30" max="300" required placeholder="e.g. 75">
+                            </div>
+                            <div class="input-group">
+                                <label for="sys_bp">Systolic Blood Pressure (mmHg)</label>
+                                <input type="number" id="sys_bp" name="sys_bp" min="70" max="240" placeholder="e.g. 120 (for PREVENT Risk)">
+                            </div>
+                        </div>
+
+                        <div class="calculated-metrics">
+                            <div class="metric-card" id="bmi-card">
+                                <span class="metric-label">Estimated BMI</span>
+                                <span class="metric-value" id="bmi-display">--</span>
+                                <span class="metric-desc" id="bmi-category">Enter height & weight</span>
+                            </div>
+                        </div>
+
+                        <div class="form-actions space-between">
+                            <button type="button" class="btn secondary-btn prev-btn" data-prev="1"><i class="fas fa-arrow-left"></i> Back</button>
+                            <button type="button" class="btn primary-btn next-btn" data-next="3">Next Step <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Lifestyle & Habits -->
+                    <div class="form-step" id="step-3">
+                        <h2><i class="fas fa-leaf"></i> Lifestyle & Habits</h2>
+                        <p class="subtitle">Your daily routines affect your lipid levels.</p>
+
+                        <div class="lifestyle-grid">
+                            <!-- Smoking -->
+                            <div class="habit-group">
+                                <label>Smoking / Vaping</label>
+                                <div class="radio-group">
+                                    <input type="radio" id="smoke_no" name="smoking" value="0" checked>
+                                    <label for="smoke_no">Never / Quit</label>
+                                    
+                                    <input type="radio" id="smoke_yes" name="smoking" value="1">
+                                    <label for="smoke_yes">Current Smoker</label>
+                                </div>
+                            </div>
+
+                            <!-- Exercise -->
+                            <div class="habit-group">
+                                <label>Physical Activity (per week)</label>
+                                <select name="exercise" required>
+                                    <option value="0">Sedentary (Rarely exercise)</option>
+                                    <option value="1">Light (1-2 days)</option>
+                                    <option value="2">Moderate (3-4 days)</option>
+                                    <option value="3">Active (5+ days)</option>
+                                </select>
+                            </div>
+
+                            <!-- Diet: Fried Food -->
+                            <div class="habit-group">
+                                <label>Fried / Fast Food (e.g. Fried Chicken, Fries)</label>
+                                <select name="diet_fried" required>
+                                    <option value="0">Rarely (0-1 times/wk)</option>
+                                    <option value="1">Sometimes (2-3 times/wk)</option>
+                                    <option value="2">Often (4+ times/wk)</option>
+                                </select>
+                            </div>
+
+                            <!-- Diet: Sugary Drinks -->
+                            <div class="habit-group">
+                                <label>Sugary Drinks (e.g. Soda, Boba, Sweet Tea)</label>
+                                <select name="diet_sugar" required>
+                                    <option value="0">Rarely</option>
+                                    <option value="1">A few times a week</option>
+                                    <option value="2">Daily</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Alcohol -->
+                            <div class="habit-group">
+                                <label>Alcohol Intake</label>
+                                <select name="alcohol" required>
+                                    <option value="0">None / Occasional</option>
+                                    <option value="1">Moderate (1-2 drinks/day)</option>
+                                    <option value="2">Heavy (3+ drinks/day)</option>
+                                </select>
+                            </div>
+
+                            <!-- Stress -->
+                            <div class="habit-group">
+                                <label>Chronic Stress Level</label>
+                                <div class="radio-group">
+                                    <input type="radio" id="stress_low" name="stress" value="0" checked>
+                                    <label for="stress_low">Low</label>
+                                    
+                                    <input type="radio" id="stress_med" name="stress" value="1">
+                                    <label for="stress_med">Moderate</label>
+                                    
+                                    <input type="radio" id="stress_high" name="stress" value="2">
+                                    <label for="stress_high">High</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions space-between">
+                            <button type="button" class="btn secondary-btn prev-btn" data-prev="2"><i class="fas fa-arrow-left"></i> Back</button>
+                            <button type="button" class="btn primary-btn next-btn" data-next="4">Next Step <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Medical History -->
+                    <div class="form-step" id="step-4">
+                        <h2><i class="fas fa-notes-medical"></i> Medical & Family History</h2>
+                        <p class="subtitle">Check any conditions you or your immediate family have.</p>
+
+                        <div class="checkbox-grid">
+                            <label class="custom-checkbox danger-check">
+                                <input type="checkbox" name="has_ascvd" value="yes">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Known Clinical ASCVD (Prior Heart Attack, Angina, Stent, Bypass, Stroke)</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="med_diabetes" value="1">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Diabetes / High Blood Sugar</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="med_hbp" value="1">
+                                <span class="checkmark"></span>
+                                <span class="check-text">High Blood Pressure (Hypertension)</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="med_cvd" value="1">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Other Cardiovascular Conditions</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="med_fatty_liver" value="1">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Fatty Liver Disease</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="fam_cholesterol" value="1">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Family History of High Cholesterol / Familial Hypercholesterolemia</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="fam_cvd" value="1">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Family History of Premature Heart Disease (Male &lt;55y, Female &lt;65y)</span>
+                            </label>
+                        </div>
+
+                        <div class="form-actions space-between">
+                            <button type="button" class="btn secondary-btn prev-btn" data-prev="3"><i class="fas fa-arrow-left"></i> Back</button>
+                            <button type="button" class="btn primary-btn next-btn" data-next="5">Next Step <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Lipid Profile Data -->
+                    <div class="form-step" id="step-5">
+                        <h2><i class="fas fa-vial"></i> Lipid Profile Results (Optional)</h2>
+                        <p class="subtitle">Enter your blood lab values for 2026 ACC/AHA rule-based analysis (LDL-C, Non-HDL-C, Lp(a)).</p>
+
+                        <div class="unit-toggle-wrapper">
+                            <span>Preferred Unit: </span>
+                            <div class="toggle-pill">
+                                <input type="radio" id="unit_mgdl" name="lipid_unit" value="mg/dL" checked>
+                                <label for="unit_mgdl">mg/dL</label>
+                                <input type="radio" id="unit_mmol" name="lipid_unit" value="mmol/L">
+                                <label for="unit_mmol">mmol/L</label>
+                                <div class="pill-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="input-grid lipid-inputs">
+                            <div class="input-group">
+                                <label for="tc">Total Cholesterol <span class="unit-label">(mg/dL)</span></label>
+                                <input type="number" id="tc" name="tc" step="0.1" placeholder="e.g. 190">
+                            </div>
+                            <div class="input-group">
+                                <label for="ldl">LDL-C (Bad) <span class="unit-label">(mg/dL)</span></label>
+                                <input type="number" id="ldl" name="ldl" step="0.1" placeholder="e.g. 110">
+                            </div>
+                            <div class="input-group">
+                                <label for="hdl">HDL-C (Good) <span class="unit-label">(mg/dL)</span></label>
+                                <input type="number" id="hdl" name="hdl" step="0.1" placeholder="e.g. 50">
+                            </div>
+                            <div class="input-group">
+                                <label for="tg">Triglycerides <span class="unit-label">(mg/dL)</span></label>
+                                <input type="number" id="tg" name="tg" step="0.1" placeholder="e.g. 140">
+                            </div>
+                            <div class="input-group">
+                                <label for="lpa">Lipoprotein(a) [Lp(a)] (Optional)</label>
+                                <input type="number" id="lpa" name="lpa" step="0.1" placeholder="e.g. 40">
+                            </div>
+                            <div class="input-group">
+                                <label for="lpa_unit">Lp(a) Unit</label>
+                                <select id="lpa_unit" name="lpa_unit">
+                                    <option value="nmol/L" selected>nmol/L (≥125 high)</option>
+                                    <option value="mg/dL">mg/dL (≥50 high)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-actions space-between mt-l">
+                            <button type="button" class="btn secondary-btn prev-btn" data-prev="4"><i class="fas fa-arrow-left"></i> Back</button>
+                            <button type="submit" class="btn cta-btn" id="analyze-btn">Analyze Results <i class="fas fa-magic"></i></button>
+                        </div>
+                    </div>
+
+                </form>
+            </section>
+
+            <!-- Results Dashboard Section -->
+            <section id="results-dashboard" class="hidden">
+                
+                <div class="dashboard-header">
+                    <h2>2026 ACC/AHA Dyslipidemia Clinical Evaluation Report</h2>
+                    <button class="btn print-btn" onclick="window.print()"><i class="fas fa-print"></i> Export / Print Personal Report</button>
+                </div>
+
+                <!-- Primary Alert Banner -->
+                <div id="primary-alert" class="alert result-alert">
+                    <i class="fas fa-info-circle"></i>
+                    <div id="alert-content">
+                        <strong>Analysis Complete</strong>
+                        <p>...</p>
+                    </div>
+                </div>
+
+                <!-- Risk Gauge Card -->
+                <div class="dashboard-grid">
+                    <div class="card gauge-card">
+                        <h3>Dyslipidemia Risk Level</h3>
+                        <div class="gauge-container">
+                            <div class="gauge">
+                                <div class="gauge-fill" id="risk-gauge-fill"></div>
+                                <div class="gauge-cover" id="risk-gauge-text">Loading...</div>
+                            </div>
+                        </div>
+                        <p id="risk-description" class="risk-desc text-center">...</p>
+                        <div id="analysis-type-badge" class="badge"></div>
+                    </div>
+
+                    <!-- Factors / Details Card -->
+                    <div class="card details-card" id="details-panel">
+                        <h3><i class="fas fa-chart-pie"></i> Risk Factor Analysis</h3>
+                        <div id="factors-list" class="factors-list">
+                            <!-- Factors injected by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2026 ACC/AHA Guideline Highlights & PREVENT Risk Section -->
+                <div id="guideline-2026-section" class="card mt-m">
+                    <h3><i class="fas fa-heart-pulse"></i> 2026 ACC/AHA Key Recommendation Highlights</h3>
+                    <div class="guideline-grid mt-s">
+                        <!-- PREVENT Calculator Card -->
+                        <div class="guideline-card" id="prevent-risk-card">
+                            <div class="card-icon"><i class="fas fa-calculator"></i></div>
+                            <h4>PREVENT™ Risk Calculator</h4>
+                            <div id="prevent-risk-display">
+                                <span class="text-muted">Requires age 30-79 without known ASCVD</span>
+                            </div>
+                            <span class="cor-badge">COR 1 | LOE B-NR</span>
+                        </div>
+
+                        <!-- Lipoprotein(a) Card -->
+                        <div class="guideline-card" id="lpa-card">
+                            <div class="card-icon"><i class="fas fa-vial-virus"></i></div>
+                            <h4>Lipoprotein(a) [Lp(a)]</h4>
+                            <div id="lpa-display">
+                                <p>Measure Lp(a) at least once in all adults for ASCVD risk assessment (Cutoff: ≥125 nmol/L or ≥50 mg/dL).</p>
+                            </div>
+                            <span class="cor-badge">COR 1 | LOE B-NR</span>
+                        </div>
+
+                        <!-- CAC Scoring Card -->
+                        <div class="guideline-card" id="cac-card">
+                            <div class="card-icon"><i class="fas fa-x-ray"></i></div>
+                            <h4>Coronary Artery Calcium (CAC)</h4>
+                            <div id="cac-display">
+                                <p>Recommended for adults with 10-yr risk ≥3% (males ≥40y, females ≥45y) with uncertainty about LLT initiation/intensification.</p>
+                            </div>
+                            <span class="cor-badge">COR 1 | LOE B-R</span>
+                        </div>
+
+                        <!-- Therapy Escalation Card -->
+                        <div class="guideline-card" id="escalation-card">
+                            <div class="card-icon"><i class="fas fa-pills"></i></div>
+                            <h4>LLT Escalation Targets</h4>
+                            <div id="escalation-display">
+                                <p>In clinical ASCVD not at target: Add Ezetimibe, PCSK9 inhibitors, or Bempedoic Acid.</p>
+                            </div>
+                            <span class="cor-badge">COR 1-2</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lipid Breakdown (Only if blood test data provided) -->
+                <div id="lipid-breakdown-section" class="card mt-m hidden">
+                    <h3><i class="fas fa-flask"></i> Clinical Lipid Breakdown (LDL-C &amp; Non-HDL-C Targets)</h3>
+                    <div class="lipid-table-responsive">
+                        <table class="lipid-table">
+                            <thead>
+                                <tr>
+                                    <th>Marker</th>
+                                    <th>Your Value</th>
+                                    <th>Target Range</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lipid-table-body">
+                                <!-- Injected by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Retesting & Lifetime Screening Protocol -->
+                <div class="card mt-m schedule-card">
+                    <h3><i class="fas fa-calendar-check"></i> Recommended Screening &amp; Retesting Schedule</h3>
+                    <div class="schedule-grid mt-s">
+                        <div class="schedule-item">
+                            <div class="schedule-badge">Retesting</div>
+                            <strong>4–12 Weeks</strong>
+                            <p>Repeat lipid profile after LLT initiation or dose adjustment.</p>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-badge">Maintenance</div>
+                            <strong>6–12 Months</strong>
+                            <p>Routine lipid testing to assess ongoing therapeutic response.</p>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-badge">Screening</div>
+                            <strong>Age 9–11 &amp; q5yr from 19</strong>
+                            <p>Universal screening at age 9–11, then every 5 years from age 19 (more frequent if risk enhancers present).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Lifestyle Coach Section -->
+                <div class="card coach-card mt-m">
+                    <div class="coach-header">
+                        <div class="coach-icon"><i class="fas fa-robot"></i></div>
+                        <div>
+                            <h3>AI Prevention Coach</h3>
+                            <p>Personalized recommendations for a healthier profile.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="tabs mt-m">
+                        <button class="tab-btn active" data-tab="food-swaps">🍲 Asian Food Swaps</button>
+                        <button class="tab-btn" data-tab="action-plan">📅 7-Day Plan</button>
+                    </div>
+
+                    <div class="tab-content active" id="food-swaps">
+                        <div class="swaps-grid" id="swaps-container">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="action-plan">
+                        <ul class="timeline" id="plan-timeline">
+                            <!-- Injected by JS -->
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="text-center mt-l">
+                    <button id="retake-btn" class="btn secondary-btn"><i class="fas fa-redo"></i> Start New Assessment</button>
+                </div>
+
+            </section>
+        </main>
+        
+        <!-- Interactive AI Chatbot Widget (Flowchart Step) -->
+        <div id="ai-chat-toggle" class="chat-toggle-btn">
+            <i class="fas fa-comments"></i> <span>Ask AI Coach</span>
+        </div>
+
+        <div id="ai-chat-window" class="chat-window hidden">
+            <div class="chat-header">
+                <div>
+                    <strong><i class="fas fa-robot"></i> LipidWise AI Health Coach</strong>
+                    <span class="status-dot"></span>
+                </div>
+                <button id="close-chat-btn" class="icon-btn-sm"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="chat-body" id="chat-messages">
+                <div class="chat-msg bot-msg">
+                    Hello! Ask me any questions about 2026 ACC/AHA guidelines, PREVENT risk, Lp(a), Non-HDL-C targets, or healthy food swaps.
+                </div>
+            </div>
+            <div class="chat-footer">
+                <input type="text" id="chat-input" placeholder="Type your question...">
+                <button id="send-chat-btn" class="btn primary-btn-sm"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 LipidWise AI Hackathon Prototype. Sourced from the 2026 ACC/AHA Dyslipidemia Guideline Update.</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./js/firebase_config.js"></script>
+    <script src="./js/rules_engine.js"></script>
+    <script src="./js/ml_model.js"></script>
+    <script src="./js/lifestyle_coach.js"></script>
+    <script src="./js/ai_chatbot.js"></script>
+    <script src="./js/app.js"></script>
+</body>
+</html>
