@@ -123,76 +123,79 @@ class LandingScreen extends StatelessWidget {
                 // Role Selection Grid
                 LayoutBuilder(builder: (context, constraints) {
                   bool isWide = constraints.maxWidth > 800;
-                  return Flex(
-                    direction: isWide ? Axis.horizontal : Axis.vertical,
-                    mainAxisAlignment: MainAxisAlignment.center,
+
+                  Widget patientCard = SizedBox(
+                    height: isWide ? 420 : 380,
+                    child: _buildRoleCard(
+                      context: context,
+                      title: 'General User / Patient',
+                      description: 'Complete a quick health & lipid assessment, receive PREVENT™ 10-year risk calculation, personalized food swaps, and AI health report.',
+                      icon: Icons.person_rounded,
+                      iconColor: const Color(0xFF2563EB),
+                      bgColor: const Color(0xFF3B82F6),
+                      primaryAction: ElevatedButton.icon(
+                        icon: const Icon(Icons.login, color: Colors.white, size: 20),
+                        label: const Text('Sign in with Google', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2563EB),
+                          minimumSize: const Size(double.infinity, 56),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
+                        onPressed: () => _signInPatient(context),
+                      ),
+                      secondaryAction: OutlinedButton(
+                        child: const Text('Continue as Guest', style: TextStyle(color: Color(0xFF64748B), fontSize: 16, fontWeight: FontWeight.bold)),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xFFCBD5E1)),
+                          minimumSize: const Size(double.infinity, 56),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        onPressed: () => _signInPatient(context, isDemo: true),
+                      )
+                    ),
+                  );
+
+                  Widget doctorCard = SizedBox(
+                    height: isWide ? 420 : 380,
+                    child: _buildRoleCard(
+                      context: context,
+                      title: 'Healthcare Provider',
+                      description: 'Access doctor portal, review patient risk list, inspect 2026 ACC/AHA guidelines summary, and add clinician follow-up notes.',
+                      icon: Icons.medical_services_rounded,
+                      iconColor: const Color(0xFF0F172A),
+                      bgColor: const Color(0xFF94A3B8),
+                      primaryAction: ElevatedButton.icon(
+                        icon: const Icon(Icons.admin_panel_settings_rounded, color: Colors.white, size: 20),
+                        label: const Text('Doctor Portal Login', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0F172A),
+                          minimumSize: const Size(double.infinity, 56),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
+                        onPressed: () => _goToDoctorLogin(context),
+                      ),
+                    ),
+                  );
+
+                  if (isWide) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: patientCard),
+                        const SizedBox(width: 32),
+                        Expanded(child: doctorCard),
+                      ],
+                    );
+                  }
+                  return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Patient Card
-                      Expanded(
-                        flex: isWide ? 1 : 0,
-                        child: SizedBox(
-                          height: isWide ? 420 : 380,
-                          child: _buildRoleCard(
-                            context: context,
-                            title: 'General User / Patient',
-                            description: 'Complete a quick health & lipid assessment, receive PREVENT™ 10-year risk calculation, personalized food swaps, and AI health report.',
-                            icon: Icons.person_rounded,
-                            iconColor: const Color(0xFF2563EB),
-                            bgColor: const Color(0xFF3B82F6),
-                            primaryAction: ElevatedButton.icon(
-                              icon: const Icon(Icons.login, color: Colors.white, size: 20),
-                              label: const Text('Sign in with Google', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2563EB),
-                                minimumSize: const Size(double.infinity, 56),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                elevation: 0,
-                              ),
-                              onPressed: () => _signInPatient(context),
-                            ),
-                            secondaryAction: OutlinedButton(
-                              child: const Text('Continue as Guest', style: TextStyle(color: Color(0xFF64748B), fontSize: 16, fontWeight: FontWeight.bold)),
-                              style: OutlinedButton.styleFrom(
-                                side: const BorderSide(color: Color(0xFFCBD5E1)),
-                                minimumSize: const Size(double.infinity, 56),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                              onPressed: () => _signInPatient(context, isDemo: true),
-                            )
-                          ),
-                        ),
-                      ),
-                      
-                      if (isWide) const SizedBox(width: 32),
-                      if (!isWide) const SizedBox(height: 32),
-                      
-                      // Doctor Card
-                      Expanded(
-                        flex: isWide ? 1 : 0,
-                        child: SizedBox(
-                          height: isWide ? 420 : 380,
-                          child: _buildRoleCard(
-                            context: context,
-                            title: 'Healthcare Provider',
-                            description: 'Access doctor portal, review patient risk list, inspect 2026 ACC/AHA guidelines summary, and add clinician follow-up notes.',
-                            icon: Icons.medical_services_rounded,
-                            iconColor: const Color(0xFF0F172A),
-                            bgColor: const Color(0xFF94A3B8),
-                            primaryAction: ElevatedButton.icon(
-                              icon: const Icon(Icons.admin_panel_settings_rounded, color: Colors.white, size: 20),
-                              label: const Text('Doctor Portal Login', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF0F172A),
-                                minimumSize: const Size(double.infinity, 56),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                elevation: 0,
-                              ),
-                              onPressed: () => _goToDoctorLogin(context),
-                            ),
-                          ),
-                        ),
-                      ),
+                      patientCard,
+                      const SizedBox(height: 32),
+                      doctorCard,
                     ],
                   );
                 }),

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>LipidWise AI — Chat Test</title>
+<style>
+  body { font-family: -apple-system, sans-serif; max-width: 640px; margin: 40px auto; background: #0f172a; color: #e2e8f0; }
+  h1 { font-size: 18px; color: #60a5fa; }
+  #log { border: 1px solid #334155; border-radius: 8px; padding: 12px; height: 420px; overflow-y: auto; background: #1e293b; }
+  .msg { margin: 8px 0; padding: 8px 12px; border-radius: 8px; max-width: 80%; white-space: pre-wrap; }
+  .user { background: #2563eb; margin-left: auto; text-align: right; }
+  .bot { background: #334155; }
+  .alert { background: #7f1d1d; border: 1px solid #ef4444; font-size: 12px; }
+  form { display: flex; gap: 8px; margin-top: 12px; }
+  input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; }
+  button { padding: 10px 16px; border-radius: 8px; border: none; background: #2563eb; color: white; cursor: pointer; }
+  button:disabled { opacity: 0.5; }
+  #meta { font-size: 12px; color: #94a3b8; margin-top: 8px; }
+</style>
+</head>
+<body>
+<h1>LipidWise AI — Chat Test (talks to http://localhost:8000)</h1>
+<div id="log"></div>
+<form id="form">
+  <input id="input" placeholder="Ask about your cholesterol..." autocomplete="off" />
+  <button type="submit" id="send">Send</button>
+</form>
+<div id="meta"></div>
+
+<script>
+const API = "http://localhost:8000";
+const sessionId = "web-test-" + Math.random().toString(36).slice(2, 8);
+const log = document.getElementById("log");
+const form = document.getElementById("form");
+const input = document.getElementById("input");
+const sendBtn = document.getElementById("send");
+const meta = document.getElementById("meta");
+
+function addMsg(text, cls) {
+  const d = document.createElement("div");
+  d.className = "msg " + cls;
+  d.textContent = text;
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
+}
+
+async function seedPatient() {
+  await fetch(API + "/patient/profile", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      session_id: sessionId, name: "Ahmad", age: 52, sex: "male",
+      weight_kg: 78, height_cm: 168, ldl_c: 172, hdl_c: 38,
+      triglycerides: 210, total_cholesterol: 248,
+      smoker: true, has_diabetes: true
+    })
+  });
+  addMsg("(loaded sample patient: Ahmad, 52M, LDL 172, HDL 38, TG 210, TC 248, smoker, diabetic)", "bot");
+}
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const message = input.value.trim();
+  if (!message) return;
+  addMsg(message, "user");
+  input.value = "";
+  sendBtn.disabled = true;
+  meta.textContent = "thinking...";
+
+  try {
+    const res = await fetch(API + "/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId, message })
+    });
+    const data = await res.json();
+    (data.alerts || []).forEach(a => addMsg(a, "msg alert"));
+    addMsg(data.reply, "bot");
+    meta.textContent = "risk_level: " + data.risk_level + " | session: " + sessionId;
+  } catch (err) {
+    addMsg("Error reaching backend: " + err, "alert");
+    meta.textContent = "Is the server running at " + API + " ?";
+  } finally {
+    sendBtn.disabled = false;
+  }
+});
+
+seedPatient();
+</script>
+</body>
+</html>
