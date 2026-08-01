@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LipidWise AI | Preventive Dyslipidemia System</title>
+    <title>LipidWise AI | 2026 ACC/AHA Dyslipidemia System</title>
     <meta name="description" content="An AI-based dyslipidemia prevention system for early risk awareness, lipid result explanation, and personalized lifestyle coaching.">
     
     <!-- Fonts -->
@@ -14,6 +14,10 @@
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="./css/styles.css">
 </head>
@@ -32,13 +36,116 @@
                 <span class="guideline-badge"><i class="fas fa-certificate"></i> 2026 ACC/AHA Guideline Aligned</span>
             </div>
             <div class="header-actions">
+                <span id="user-profile-badge" class="user-badge hidden"></span>
+                <button id="role-switch-btn" class="btn outline-btn hidden" onclick="location.reload()"><i class="fas fa-user-gear"></i> Change Role</button>
                 <button id="theme-toggle" class="icon-btn" aria-label="Toggle Theme"><i class="fas fa-moon"></i></button>
             </div>
         </header>
 
         <main class="main-content">
-            <!-- Progress Tracker -->
-            <div class="progress-container" id="progress-container">
+
+            <!-- Welcome Screen / Role Selection (Flowchart Step 1 & 2) -->
+            <section id="welcome-screen" class="card welcome-card">
+                <div class="welcome-header text-center">
+                    <div class="hero-icon"><i class="fas fa-shield-heart"></i></div>
+                    <h2>Welcome to LipidWise AI</h2>
+                    <p class="subtitle">Next-Gen Preventive Dyslipidemia & ASCVD Risk Awareness System</p>
+                </div>
+
+                <div class="role-grid mt-l">
+                    <!-- Role 1: General User / Patient -->
+                    <div class="role-card">
+                        <div class="role-icon patient-icon"><i class="fas fa-user-astronaut"></i></div>
+                        <h3>General User / Potential Patient</h3>
+                        <p>Complete a quick health & lipid assessment, receive PREVENT™ 10-year risk calculation, personalized food swaps, and AI health report.</p>
+                        
+                        <div class="auth-action mt-m">
+                            <button id="google-signin-patient" class="btn google-btn full-width">
+                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo" class="google-icon">
+                                Sign in with Google (Patient)
+                            </button>
+                            <button id="guest-continue-patient" class="btn text-btn full-width mt-xs">Continue as Guest <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Role 2: Doctor / Admin -->
+                    <div class="role-card doctor-role">
+                        <div class="role-icon doctor-icon"><i class="fas fa-user-md"></i></div>
+                        <h3>Doctor / Healthcare Provider</h3>
+                        <p>Access doctor portal, review patient risk list, inspect 2026 ACC/AHA guidelines summary, and add clinician follow-up notes.</p>
+                        
+                        <div class="auth-action mt-m">
+                            <button id="google-signin-doctor" class="btn google-doctor-btn full-width">
+                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo" class="google-icon">
+                                Sign in with Google (Doctor)
+                            </button>
+                            <button id="demo-doctor-btn" class="btn outline-btn full-width mt-xs"><i class="fas fa-stethoscope"></i> Doctor Portal Demo</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Doctor / Admin Dashboard View (Flowchart Path 2) -->
+            <section id="doctor-dashboard" class="hidden">
+                <div class="dashboard-header">
+                    <h2><i class="fas fa-user-doctor"></i> Doctor / Admin Clinical Portal</h2>
+                    <span class="badge status-pill status-ideal">Active Clinician Mode</span>
+                </div>
+
+                <!-- Patient List Table -->
+                <div class="card mt-m">
+                    <div class="card-header-flex">
+                        <h3><i class="fas fa-users"></i> Patient Screening Registry</h3>
+                        <input type="text" id="patient-search" placeholder="Search patient name or risk..." class="search-input">
+                    </div>
+                    <div class="lipid-table-responsive mt-s">
+                        <table class="lipid-table">
+                            <thead>
+                                <tr>
+                                    <th>Patient Name</th>
+                                    <th>Age/Sex</th>
+                                    <th>PREVENT 10-Yr Risk</th>
+                                    <th>Lp(a) Status</th>
+                                    <th>Risk Severity</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="doctor-patient-table">
+                                <!-- Injected by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Selected Patient Detail Modal / Section -->
+                <div id="doctor-patient-modal" class="card mt-m hidden">
+                    <div class="dashboard-header">
+                        <h3><i class="fas fa-id-card"></i> Clinical Patient Detail Report: <span id="doc-pt-name">Alex Smith</span></h3>
+                        <button class="btn secondary-btn" onclick="document.getElementById('doctor-patient-modal').classList.add('hidden')">Close Inspector</button>
+                    </div>
+
+                    <div class="guideline-grid mt-m">
+                        <div class="guideline-card">
+                            <h4>AI Summary of Patient Risk</h4>
+                            <p id="doc-pt-ai-summary" class="text-sm">Patient shows elevated Non-HDL-C (165 mg/dL) and 10-year PREVENT risk score of 5.8%. 2026 ACC/AHA guidelines suggest statin initiation or dose intensification.</p>
+                        </div>
+                        <div class="guideline-card">
+                            <h4>Review Lifestyle & Lipid Data</h4>
+                            <p id="doc-pt-lipid-review" class="text-sm">TC: 215, LDL: 140, HDL: 50, TG: 150 mg/dL. Lp(a): 135 nmol/L (HIGH ≥125).</p>
+                        </div>
+                    </div>
+
+                    <!-- Doctor Notes / Follow-Up Recommendation -->
+                    <div class="doctor-notes-box mt-m">
+                        <label for="doctor-notes-input"><strong><i class="fas fa-pen-to-square"></i> Doctor Notes & Follow-Up Recommendation:</strong></label>
+                        <textarea id="doctor-notes-input" rows="4" placeholder="Enter clinical recommendations, statin prescription adjustments, or lifestyle orders..."></textarea>
+                        <button id="save-doctor-notes-btn" class="btn primary-btn mt-s"><i class="fas fa-save"></i> Save Doctor Notes</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Progress Tracker for Assessment Form -->
+            <div class="progress-container hidden" id="progress-container">
                 <div class="progress-bar" id="progress-bar"></div>
                 <div class="steps-indicator">
                     <div class="step active" data-step="1">1</div>
@@ -50,7 +157,7 @@
             </div>
 
             <!-- Form Section -->
-            <section id="assessment-form" class="card form-card">
+            <section id="assessment-form" class="card form-card hidden">
                 <form id="lipid-form">
                     
                     <!-- Step 1: Emergency & Warning Signs -->
@@ -275,7 +382,7 @@
                             <label class="custom-checkbox">
                                 <input type="checkbox" name="fam_cvd" value="1">
                                 <span class="checkmark"></span>
-                                <span class="check-text">Family History of Premature Heart Disease (Male <55y, Female <65y)</span>
+                                <span class="check-text">Family History of Premature Heart Disease (Male &lt;55y, Female &lt;65y)</span>
                             </label>
                         </div>
 
@@ -345,7 +452,7 @@
                 
                 <div class="dashboard-header">
                     <h2>2026 ACC/AHA Dyslipidemia Clinical Evaluation Report</h2>
-                    <button class="btn print-btn" onclick="window.print()"><i class="fas fa-print"></i> Export / Print</button>
+                    <button class="btn print-btn" onclick="window.print()"><i class="fas fa-print"></i> Export / Print Personal Report</button>
                 </div>
 
                 <!-- Primary Alert Banner -->
@@ -428,7 +535,7 @@
 
                 <!-- Lipid Breakdown (Only if blood test data provided) -->
                 <div id="lipid-breakdown-section" class="card mt-m hidden">
-                    <h3><i class="fas fa-flask"></i> Clinical Lipid Breakdown (LDL-C & Non-HDL-C Targets)</h3>
+                    <h3><i class="fas fa-flask"></i> Clinical Lipid Breakdown (LDL-C &amp; Non-HDL-C Targets)</h3>
                     <div class="lipid-table-responsive">
                         <table class="lipid-table">
                             <thead>
@@ -448,7 +555,7 @@
 
                 <!-- Retesting & Lifetime Screening Protocol -->
                 <div class="card mt-m schedule-card">
-                    <h3><i class="fas fa-calendar-check"></i> Recommended Screening & Retesting Schedule</h3>
+                    <h3><i class="fas fa-calendar-check"></i> Recommended Screening &amp; Retesting Schedule</h3>
                     <div class="schedule-grid mt-s">
                         <div class="schedule-item">
                             <div class="schedule-badge">Retesting</div>
@@ -462,7 +569,7 @@
                         </div>
                         <div class="schedule-item">
                             <div class="schedule-badge">Screening</div>
-                            <strong>Age 9–11 & q5yr from 19</strong>
+                            <strong>Age 9–11 &amp; q5yr from 19</strong>
                             <p>Universal screening at age 9–11, then every 5 years from age 19 (more frequent if risk enhancers present).</p>
                         </div>
                     </div>
@@ -503,15 +610,41 @@
             </section>
         </main>
         
+        <!-- Interactive AI Chatbot Widget (Flowchart Step) -->
+        <div id="ai-chat-toggle" class="chat-toggle-btn">
+            <i class="fas fa-comments"></i> <span>Ask AI Coach</span>
+        </div>
+
+        <div id="ai-chat-window" class="chat-window hidden">
+            <div class="chat-header">
+                <div>
+                    <strong><i class="fas fa-robot"></i> LipidWise AI Health Coach</strong>
+                    <span class="status-dot"></span>
+                </div>
+                <button id="close-chat-btn" class="icon-btn-sm"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="chat-body" id="chat-messages">
+                <div class="chat-msg bot-msg">
+                    Hello! Ask me any questions about 2026 ACC/AHA guidelines, PREVENT risk, Lp(a), Non-HDL-C targets, or healthy food swaps.
+                </div>
+            </div>
+            <div class="chat-footer">
+                <input type="text" id="chat-input" placeholder="Type your question...">
+                <button id="send-chat-btn" class="btn primary-btn-sm"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+
         <footer>
             <p>&copy; 2026 LipidWise AI Hackathon Prototype. Sourced from the 2026 ACC/AHA Dyslipidemia Guideline Update.</p>
         </footer>
     </div>
 
     <!-- Scripts -->
+    <script src="./js/firebase_config.js"></script>
     <script src="./js/rules_engine.js"></script>
     <script src="./js/ml_model.js"></script>
     <script src="./js/lifestyle_coach.js"></script>
+    <script src="./js/ai_chatbot.js"></script>
     <script src="./js/app.js"></script>
 </body>
 </html>

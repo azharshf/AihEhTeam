@@ -86,9 +86,9 @@ body::after {
 }
 
 .app-container {
-    max-width: 900px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 2rem 1.5rem;
 }
 
 h1, h2, h3, h4 {
@@ -855,13 +855,236 @@ h1, h2, h3, h4 {
 .text-sm { font-size: 0.85rem; }
 .mt-xs { margin-top: 0.25rem; }
 
+/* Welcome & Role Selection Styling */
+.welcome-card {
+    padding: 3rem 2rem;
+}
+
+.hero-icon {
+    font-size: 3.5rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.role-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.role-card {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-m);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: var(--transition);
+}
+
+.role-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-glow);
+}
+
+.role-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.patient-icon { color: #3b82f6; }
+.doctor-icon { color: #10b981; }
+
+.google-btn {
+    background: #ffffff;
+    color: #374151;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    border: 1px solid #d1d5db;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.google-btn:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.google-doctor-btn {
+    background: #10b981;
+    color: white;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.google-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.full-width { width: 100%; }
+
+/* Doctor Dashboard */
+.card-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--card-border);
+    color: var(--text-color);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-s);
+    font-size: 0.9rem;
+    min-width: 250px;
+}
+
+.doctor-notes-box textarea {
+    width: 100%;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--card-border);
+    color: var(--text-color);
+    padding: 1rem;
+    border-radius: var(--radius-s);
+    font-family: inherit;
+    font-size: 0.95rem;
+    margin-top: 0.5rem;
+}
+
+.primary-btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.user-badge {
+    background: rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    color: var(--primary);
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Chatbot Widget */
+.chat-toggle-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--emerald-grad);
+    color: white;
+    padding: 0.85rem 1.5rem;
+    border-radius: 30px;
+    font-weight: 700;
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+}
+
+.chat-toggle-btn:hover {
+    transform: scale(1.05);
+}
+
+.chat-window {
+    position: fixed;
+    bottom: 5rem;
+    right: 2rem;
+    width: 360px;
+    height: 480px;
+    background: var(--bg-color);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-m);
+    box-shadow: var(--shadow-card);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chat-header {
+    background: rgba(0, 0, 0, 0.4);
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--card-border);
+}
+
+.chat-body {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.chat-msg {
+    max-width: 80%;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    line-height: 1.4;
+}
+
+.bot-msg {
+    align-self: flex-start;
+    background: rgba(30, 41, 59, 0.9);
+    border: 1px solid var(--card-border);
+}
+
+.user-msg {
+    align-self: flex-end;
+    background: var(--primary);
+    color: white;
+}
+
+.chat-footer {
+    padding: 0.75rem;
+    background: rgba(0,0,0,0.3);
+    display: flex;
+    gap: 0.5rem;
+    border-top: 1px solid var(--card-border);
+}
+
+.chat-footer input {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--card-border);
+    color: var(--text-color);
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.88rem;
+}
+
 /* Print Styles */
 @media print {
     body { background: white; color: black; }
-    .app-header, .print-btn, #retake-btn, #assessment-form { display: none !important; }
+    .app-header, .print-btn, #retake-btn, #assessment-form, .chat-toggle-btn, .chat-window { display: none !important; }
     .card { box-shadow: none; border: 1px solid #ccc; background: white; }
     .gauge-cover { background: white; }
     * { color: black !important; }
     #results-dashboard { display: block !important; }
 }
+
 

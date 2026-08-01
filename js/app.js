@@ -31,13 +31,156 @@ document.addEventListener('DOMContentLoaded', () => {
     // Navigation state
     let currentStep = 1;
     const totalSteps = 5;
-    
+
+    // --- Role & Authentication Logic ---
+    const welcomeScreen = document.getElementById('welcome-screen');
+    const doctorDashboard = document.getElementById('doctor-dashboard');
+    const assessmentForm = document.getElementById('assessment-form');
+    const progressContainer = document.getElementById('progress-container');
+    const userProfileBadge = document.getElementById('user-profile-badge');
+    const roleSwitchBtn = document.getElementById('role-switch-btn');
+
+    const startPatientMode = (user) => {
+        welcomeScreen.classList.add('hidden');
+        doctorDashboard.classList.add('hidden');
+        assessmentForm.classList.remove('hidden');
+        progressContainer.classList.remove('hidden');
+        roleSwitchBtn.classList.remove('hidden');
+        
+        if (user) {
+            userProfileBadge.classList.remove('hidden');
+            userProfileBadge.innerHTML = `<i class="fas fa-user-check"></i> ${user.displayName}`;
+        }
+    };
+
+    const startDoctorMode = (user) => {
+        welcomeScreen.classList.add('hidden');
+        assessmentForm.classList.add('hidden');
+        progressContainer.classList.add('hidden');
+        doctorDashboard.classList.remove('hidden');
+        roleSwitchBtn.classList.remove('hidden');
+
+        if (user) {
+            userProfileBadge.classList.remove('hidden');
+            userProfileBadge.innerHTML = `<i class="fas fa-stethoscope"></i> ${user.displayName}`;
+        }
+
+        renderDoctorRegistry();
+    };
+
+    document.getElementById('google-signin-patient').addEventListener('click', async () => {
+        const user = await AuthService.signInWithGoogle('Patient');
+        startPatientMode(user);
+    });
+
+    document.getElementById('guest-continue-patient').addEventListener('click', () => {
+        startPatientMode(null);
+    });
+
+    document.getElementById('google-signin-doctor').addEventListener('click', async () => {
+        const user = await AuthService.signInWithGoogle('Doctor');
+        startDoctorMode(user);
+    });
+
+    document.getElementById('demo-doctor-btn').addEventListener('click', () => {
+        const demoDoctor = { displayName: 'Dr. Sarah Jenkins, MD', role: 'Doctor' };
+        startDoctorMode(demoDoctor);
+    });
+
+    // --- Doctor Registry & Inspection ---
+    const DEMO_PATIENTS = [
+        { name: 'Alex Smith', age: 48, sex: 'Male', prevent: '5.8%', lpa: '135 nmol/L (High)', severity: 'High', tc: 215, ldl: 140, hdl: 50, tg: 150, notes: 'Initiated Atorvastatin 20mg daily. Recheck in 8 weeks.' },
+        { name: 'Maria Garcia', age: 54, sex: 'Female', prevent: '2.1%', lpa: '45 nmol/L (Normal)', severity: 'Low', tc: 180, ldl: 100, hdl: 55, tg: 110, notes: 'Low risk. Continue Mediterranean diet and 30min daily walk.' },
+        { name: 'David Tan', age: 62, sex: 'Male', prevent: '12.4%', lpa: '160 nmol/L (High)', severity: 'Very High', tc: 260, ldl: 185, hdl: 38, tg: 220, notes: 'Clinical ASCVD candidate. Statin + Ezetimibe 10mg recommended.' }
+    ];
+
+    const renderDoctorRegistry = () => {
+        const tbody = document.getElementById('doctor-patient-table');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        DEMO_PATIENTS.forEach((pt, idx) => {
+            const tr = document.createElement('tr');
+            let pillClass = 'status-ideal';
+            if (pt.severity === 'High' || pt.severity === 'Very High') pillClass = 'status-high';
+            else if (pt.severity === 'Moderate') pillClass = 'status-borderline';
+
+            tr.innerHTML = `
+                <td><strong>${pt.name}</strong></td>
+                <td>${pt.age} / ${pt.sex}</td>
+                <td>${pt.prevent}</td>
+                <td>${pt.lpa}</td>
+                <td><span class="status-pill ${pillClass}">${pt.severity}</span></td>
+                <td><button class="btn primary-btn-sm" onclick="inspectPatient(${idx})"><i class="fas fa-folder-open"></i> Open Report</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    };
+
+    window.inspectPatient = (idx) => {
+        const pt = DEMO_PATIENTS[idx];
+        document.getElementById('doc-pt-name').innerText = `${pt.name} (${pt.age}y, ${pt.sex})`;
+        document.getElementById('doc-pt-ai-summary').innerText = `2026 ACC/AHA Risk Evaluation: 10-Yr PREVENT Risk ${pt.prevent}. Guideline Recommendation: ${pt.severity === 'Very High' ? 'Aggressive LLT + Non-statin add-on' : 'Lifestyle modification & routine tracking'}.`;
+        document.getElementById('doc-pt-lipid-review').innerText = `Total Cholesterol: ${pt.tc} mg/dL, LDL-C: ${pt.ldl} mg/dL, HDL-C: ${pt.hdl} mg/dL, TG: ${pt.tg} mg/dL. Lp(a): ${pt.lpa}.`;
+        document.getElementById('doctor-notes-input').value = pt.notes || '';
+        document.getElementById('doctor-patient-modal').classList.remove('hidden');
+    };
+
+    document.getElementById('save-doctor-notes-btn')?.addEventListener('click', () => {
+        alert("Doctor Notes & Follow-Up Recommendation saved successfully to clinical records!");
+        document.getElementById('doctor-patient-modal').classList.add('hidden');
+    });
+
+    // --- AI Chatbot Widget Logic ---
+    const chatToggleBtn = document.getElementById('ai-chat-toggle');
+    const chatWindow = document.getElementById('ai-chat-window');
+    const closeChatBtn = document.getElementById('close-chat-btn');
+    const sendChatBtn = document.getElementById('send-chat-btn');
+    const chatInput = document.getElementById('chat-input');
+    const chatMessages = document.getElementById('chat-messages');
+
+    chatToggleBtn?.addEventListener('click', () => {
+        chatWindow.classList.toggle('hidden');
+    });
+
+    closeChatBtn?.addEventListener('click', () => {
+        chatWindow.classList.add('hidden');
+    });
+
+    const handleSendMessage = () => {
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        // Render user message
+        const userDiv = document.createElement('div');
+        userDiv.className = 'chat-msg user-msg';
+        userDiv.innerText = text;
+        chatMessages.appendChild(userDiv);
+        chatInput.value = '';
+
+        // Generate Bot Answer
+        setTimeout(() => {
+            const reply = AIChatbot.getResponse(text);
+            const botDiv = document.createElement('div');
+            botDiv.className = 'chat-msg bot-msg';
+            botDiv.innerText = reply;
+            chatMessages.appendChild(botDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 400);
+    };
+
+    sendChatBtn?.addEventListener('click', handleSendMessage);
+    chatInput?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleSendMessage();
+    });
+
     // --- Theme Toggle ---
     themeBtn.addEventListener('click', () => {
         isDark = !isDark;
         document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
         themeBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
     });
+
 
     // --- Emergency Symptoms Logic ---
     symptomNone.addEventListener('change', (e) => {
