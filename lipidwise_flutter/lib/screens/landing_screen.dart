@@ -1,152 +1,67 @@
 import 'package:flutter/material.dart';
-import 'assessment_screen.dart';
+import '../services/auth_service.dart';
+import 'main_layout.dart';
 
 class LandingScreen extends StatelessWidget {
   const LandingScreen({super.key});
 
+  void _signInAndProceed(BuildContext context, String role) async {
+    final AuthService auth = AuthService();
+    final user = await auth.signInWithGoogle();
+    if (user != null) {
+      if (context.mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MainLayout(role: role)),
+        );
+      }
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to sign in. Please try again.')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-          ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.favorite, size: 80, color: Colors.blueAccent),
-                const SizedBox(height: 20),
-                const Text(
-                  'LipidWise AI',
-                  style: TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+      backgroundColor: const Color(0xFF0F172A),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.favorite, size: 80, color: Color(0xFF3B82F6)),
+              const SizedBox(height: 24),
+              const Text('Welcome to LipidWise AI', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              const Text('Select your role to continue', style: TextStyle(color: Colors.white70, fontSize: 18)),
+              const SizedBox(height: 48),
+              
+              ElevatedButton.icon(
+                icon: const Icon(Icons.person, color: Colors.white),
+                label: const Text('Sign in as Patient (Google)', style: TextStyle(color: Colors.white, fontSize: 16)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2563EB),
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                const SizedBox(height: 10),
-                const Text(
-                  'AI-Based Dyslipidemia Prevention System',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 50),
-                const Text(
-                  'Please select your role to sign in:',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
-                ),
-                const SizedBox(height: 30),
-                // Patient Sign In
-                _RoleCard(
-                  title: 'Patient',
-                  icon: Icons.person,
-                  description: 'Assess your risk and get lifestyle advice.',
-                  color: Colors.blueAccent,
-                  onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AssessmentScreen(role: 'Patient'),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 20),
-                // Doctor Sign In
-                _RoleCard(
-                  title: 'Doctor / Healthcare Professional',
-                  icon: Icons.medical_services,
-                  description: 'Review patient data and clinical rules.',
-                  color: Colors.tealAccent.shade400,
-                  onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AssessmentScreen(role: 'Doctor'),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RoleCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final String description;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _RoleCard({
-    required this.title,
-    required this.icon,
-    required this.description,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white24),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
+                onPressed: () => _signInAndProceed(context, 'Patient'),
               ),
-              child: Icon(icon, size: 36, color: color),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: const TextStyle(fontSize: 14, color: Colors.white70),
-                  ),
-                ],
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.medical_services, color: Color(0xFF0F172A)),
+                label: const Text('Sign in as Doctor (Google)', style: TextStyle(color: Color(0xFF0F172A), fontSize: 16)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () => _signInAndProceed(context, 'Doctor'),
               ),
-            ),
-            const Icon(Icons.arrow_forward_ios, color: Colors.white54),
-          ],
+            ],
+          ),
         ),
       ),
     );

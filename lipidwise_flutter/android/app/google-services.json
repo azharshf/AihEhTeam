@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "703276097975",
+    "project_id": "lipidwise-ai-hack",
+    "storage_bucket": "lipidwise-ai-hack.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:703276097975:android:27a5ca3bdff5f55c7dc832",
+        "android_client_info": {
+          "package_name": "com.example.lipidwise_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdt8ogY9Q2ZeHX6WigfyF4wQRx21DHZLg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

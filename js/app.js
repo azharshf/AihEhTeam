@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const hasEmergency = data.symptom_chest_pain || data.symptom_stroke || data.symptom_sob || data.symptom_abdomen;
         
         // Determine if we have lipid lab values
-        const hasLipids = data.tc || data.ldl || data.hdl || data.tg;
+        const hasLipids = data.tc || data.ldl || data.hdl || data.tg || data.lpa;
 
         // Run Analysis
         let result = {};
@@ -159,33 +159,32 @@ document.addEventListener('DOMContentLoaded', () => {
             result.message = "Emergency warning: Your symptoms may be urgent. Please seek emergency medical care now.";
             result.typeBadge = "Symptom Triage";
         } 
-        else if (hasLipids) {
-            // Rule Based
-            const rulesResult = RulesEngine.analyzeLipids(data.tc, data.ldl, data.hdl, data.tg, data.lipid_unit, data.sex);
+        else {
+            // 2026 ACC/AHA Rule-Based Analysis
+            const rulesResult = RulesEngine.analyzeLipids(data);
             result.category = rulesResult.category;
             result.message = rulesResult.message;
             result.breakdown = rulesResult.breakdown;
-            result.typeBadge = "Clinical Rule-Based Analysis";
+            result.preventRisk = rulesResult.preventRisk;
+            result.lpaAssessment = rulesResult.lpaAssessment;
+            result.cacRecommendation = rulesResult.cacRecommendation;
+            result.therapyEscalation = rulesResult.therapyEscalation;
+            result.typeBadge = "2026 ACC/AHA Rule-Based Analysis";
             
             // Map category to gauge (0-180)
             const gMap = { "Low": 45, "Moderate": 90, "High": 135, "Very High": 180 };
             result.gaugeValue = gMap[result.category];
             
-            // Show Lipid Breakdown UI
-            document.getElementById('lipid-breakdown-section').classList.remove('hidden');
-            renderLipidTable(result.breakdown, data.lipid_unit);
-        } 
-        else {
-            // ML Prediction
-            const mlResult = MLPredictor.predictRisk(data);
-            result.category = mlResult.category;
-            result.message = mlResult.message;
-            result.gaugeValue = mlResult.gaugeValue;
-            result.factors = mlResult.topFactors;
-            result.typeBadge = "AI Machine Learning Prediction";
-            
-            document.getElementById('lipid-breakdown-section').classList.add('hidden');
-            renderFactors(result.factors);
+            // Show/Hide Lipid Breakdown UI
+            if (hasLipids) {
+                document.getElementById('lipid-breakdown-section').classList.remove('hidden');
+                renderLipidTable(result.breakdown, data.lipid_unit);
+            } else {
+                document.getElementById('lipid-breakdown-section').classList.add('hidden');
+                const mlResult = MLPredictor.predictRisk(data);
+                result.factors = mlResult.topFactors;
+                renderFactors(result.factors);
+            }
         }
 
         // Show Results Dashboard
@@ -218,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alertBox.querySelector('i').className = 'fas fa-check-circle';
         }
         
-        alertContent.innerHTML = `<strong>${result.category} Concern</strong><p>${result.message}</p>`;
+        alertContent.innerHTML = `<strong>${result.category} Risk Category (2026 ACC/AHA Guideline)</strong><p>${result.message}</p>`;
 
         // Gauge Animation
         setTimeout(() => {
@@ -230,12 +229,63 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300);
 
         document.getElementById('risk-gauge-text').innerText = result.category;
-        document.getElementById('risk-description').innerText = `Your health profile aligns with a ${result.category.toLowerCase()} risk pattern.`;
+        document.getElementById('risk-description').innerText = `Your profile aligns with a ${result.category.toLowerCase()} ASCVD concern pattern under 2026 guidelines.`;
         document.getElementById('analysis-type-badge').innerText = result.typeBadge;
+
+        // Render 2026 Guideline Cards
+        render2026Highlights(result);
 
         // Lifestyle Coach
         renderFoodSwaps(LifestyleCoach.getFoodSwaps(userData));
         renderTimeline(LifestyleCoach.getActionPlan(userData, result.category));
+    };
+
+    const render2026Highlights = (result) => {
+        // PREVENT Card
+        const preventDisplay = document.getElementById('prevent-risk-display');
+        if (result.preventRisk) {
+            preventDisplay.innerHTML = `
+                <div class="stat-highlight">
+                    <div><strong>10-Yr Risk:</strong> ${result.preventRisk.label10Yr}</div>
+                    <div><strong>30-Yr Risk:</strong> ${result.preventRisk.label30Yr}</div>
+                </div>
+                <p class="text-sm mt-xs"><strong>Status:</strong> ${result.preventRisk.status}</p>
+            `;
+        } else {
+            preventDisplay.innerHTML = `<p class="text-muted text-sm">PREVENT™ Risk applies to primary prevention adults (ages 30–79 without ASCVD).</p>`;
+        }
+
+        // Lp(a) Card
+        const lpaDisplay = document.getElementById('lpa-display');
+        if (result.lpaAssessment) {
+            const isHigh = result.lpaAssessment.isHigh;
+            lpaDisplay.innerHTML = `
+                ${result.lpaAssessment.value ? `<p><strong>Measured Lp(a):</strong> ${result.lpaAssessment.value} ${result.lpaAssessment.unit}</p>` : ''}
+                <p class="text-sm ${isHigh ? 'text-danger font-semibold' : ''}">${result.lpaAssessment.recommendation}</p>
+            `;
+        }
+
+        // CAC Card
+        const cacDisplay = document.getElementById('cac-display');
+        if (result.cacRecommendation && result.cacRecommendation.recommended) {
+            cacDisplay.innerHTML = `
+                <p class="text-sm text-warning"><strong>Recommended (COR 1):</strong> 10-Yr ASCVD Risk ≥ 3%. CAC scoring is recommended to refine risk assessment & guide LLT decisions.</p>
+            `;
+        } else {
+            cacDisplay.innerHTML = `<p class="text-sm text-muted">CAC scoring recommended when 10-yr risk ≥ 3% with LLT uncertainty.</p>`;
+        }
+
+        // Therapy Escalation Card
+        const escDisplay = document.getElementById('escalation-display');
+        if (result.therapyEscalation) {
+            escDisplay.innerHTML = `
+                <p class="text-sm ${result.therapyEscalation.isNotAtTarget ? 'text-danger' : 'text-success'}">
+                    ${result.therapyEscalation.guidelineAdvice}
+                </p>
+            `;
+        } else {
+            escDisplay.innerHTML = `<p class="text-sm text-muted">Guide LLT based on risk level using % reduction, LDL-C (<100 mg/dL), and Non-HDL-C (<130 mg/dL) targets.</p>`;
+        }
     };
 
     const renderLipidTable = (breakdown, unit) => {
@@ -244,8 +294,8 @@ document.addEventListener('DOMContentLoaded', () => {
         breakdown.forEach(b => {
             const tr = document.createElement('tr');
             let statusClass = 'status-ideal';
-            if(b.status === 'Borderline') statusClass = 'status-borderline';
-            else if(b.status === 'High' || b.status === 'Very High' || b.status === 'Low') statusClass = 'status-high';
+            if(b.status.includes('Borderline')) statusClass = 'status-borderline';
+            else if(b.status.includes('High') || b.status.includes('Very High') || b.status.includes('Low')) statusClass = 'status-high';
             
             tr.innerHTML = `
                 <td>${b.marker}</td>
@@ -256,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tbody.appendChild(tr);
         });
         
-        document.getElementById('factors-list').innerHTML = '<p class="text-muted">Clinical rules derived from AHA / Merck guidelines based on your precise blood test data.</p>';
+        document.getElementById('factors-list').innerHTML = '<p class="text-muted">Clinical rules derived from 2026 ACC/AHA Dyslipidemia Guidelines based on your precise blood test data.</p>';
     };
 
     const renderFactors = (factors) => {

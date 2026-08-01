@@ -756,6 +756,105 @@ h1, h2, h3, h4 {
 .time-title { font-weight: 600; color: var(--primary); margin-bottom: 0.25rem; }
 .time-desc { font-size: 0.9rem; }
 
+/* 2026 ACC/AHA Guideline UI Elements */
+.guideline-badge {
+    background: var(--amethyst-grad);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    margin-left: 0.75rem;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.guideline-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.guideline-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-m);
+    padding: 1.25rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: var(--transition);
+}
+
+.guideline-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.guideline-card .card-icon {
+    font-size: 1.5rem;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.guideline-card h4 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.cor-badge {
+    align-self: flex-start;
+    margin-top: 0.75rem;
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--primary);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.schedule-card {
+    border-left: 4px solid var(--info);
+}
+
+.schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.schedule-item {
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--card-border);
+    padding: 1rem;
+    border-radius: var(--radius-s);
+}
+
+.schedule-badge {
+    display: inline-block;
+    background: var(--cyan-grad);
+    color: white;
+    font-weight: 700;
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.stat-highlight {
+    background: rgba(59, 130, 246, 0.15);
+    border-radius: 6px;
+    padding: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.text-sm { font-size: 0.85rem; }
+.mt-xs { margin-top: 0.25rem; }
+
 /* Print Styles */
 @media print {
     body { background: white; color: black; }
@@ -765,3 +864,4 @@ h1, h2, h3, h4 {
     * { color: black !important; }
     #results-dashboard { display: block !important; }
 }
+

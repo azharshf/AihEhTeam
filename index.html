@@ -29,6 +29,7 @@
             <div class="logo">
                 <div class="logo-icon"><i class="fas fa-heartbeat"></i></div>
                 <h1>LipidWise <span>AI</span></h1>
+                <span class="guideline-badge"><i class="fas fa-certificate"></i> 2026 ACC/AHA Guideline Aligned</span>
             </div>
             <div class="header-actions">
                 <button id="theme-toggle" class="icon-btn" aria-label="Toggle Theme"><i class="fas fa-moon"></i></button>
@@ -134,6 +135,10 @@
                                 <label for="weight">Weight (kg)</label>
                                 <input type="number" id="weight" name="weight" min="30" max="300" required placeholder="e.g. 75">
                             </div>
+                            <div class="input-group">
+                                <label for="sys_bp">Systolic Blood Pressure (mmHg)</label>
+                                <input type="number" id="sys_bp" name="sys_bp" min="70" max="240" placeholder="e.g. 120 (for PREVENT Risk)">
+                            </div>
                         </div>
 
                         <div class="calculated-metrics">
@@ -237,6 +242,11 @@
                         <p class="subtitle">Check any conditions you or your immediate family have.</p>
 
                         <div class="checkbox-grid">
+                            <label class="custom-checkbox danger-check">
+                                <input type="checkbox" name="has_ascvd" value="yes">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Known Clinical ASCVD (Prior Heart Attack, Angina, Stent, Bypass, Stroke)</span>
+                            </label>
                             <label class="custom-checkbox">
                                 <input type="checkbox" name="med_diabetes" value="1">
                                 <span class="checkmark"></span>
@@ -250,7 +260,7 @@
                             <label class="custom-checkbox">
                                 <input type="checkbox" name="med_cvd" value="1">
                                 <span class="checkmark"></span>
-                                <span class="check-text">Previous Heart Disease / Stroke</span>
+                                <span class="check-text">Other Cardiovascular Conditions</span>
                             </label>
                             <label class="custom-checkbox">
                                 <input type="checkbox" name="med_fatty_liver" value="1">
@@ -260,12 +270,12 @@
                             <label class="custom-checkbox">
                                 <input type="checkbox" name="fam_cholesterol" value="1">
                                 <span class="checkmark"></span>
-                                <span class="check-text">Family History of High Cholesterol</span>
+                                <span class="check-text">Family History of High Cholesterol / Familial Hypercholesterolemia</span>
                             </label>
                             <label class="custom-checkbox">
                                 <input type="checkbox" name="fam_cvd" value="1">
                                 <span class="checkmark"></span>
-                                <span class="check-text">Family History of Early Heart Attack/Stroke</span>
+                                <span class="check-text">Family History of Premature Heart Disease (Male <55y, Female <65y)</span>
                             </label>
                         </div>
 
@@ -278,7 +288,7 @@
                     <!-- Step 5: Lipid Profile Data -->
                     <div class="form-step" id="step-5">
                         <h2><i class="fas fa-vial"></i> Lipid Profile Results (Optional)</h2>
-                        <p class="subtitle">If you have recent blood test results, enter them here for high-accuracy rule-based analysis. If not, skip and we'll estimate your risk using Machine Learning.</p>
+                        <p class="subtitle">Enter your blood lab values for 2026 ACC/AHA rule-based analysis (LDL-C, Non-HDL-C, Lp(a)).</p>
 
                         <div class="unit-toggle-wrapper">
                             <span>Preferred Unit: </span>
@@ -308,6 +318,17 @@
                                 <label for="tg">Triglycerides <span class="unit-label">(mg/dL)</span></label>
                                 <input type="number" id="tg" name="tg" step="0.1" placeholder="e.g. 140">
                             </div>
+                            <div class="input-group">
+                                <label for="lpa">Lipoprotein(a) [Lp(a)] (Optional)</label>
+                                <input type="number" id="lpa" name="lpa" step="0.1" placeholder="e.g. 40">
+                            </div>
+                            <div class="input-group">
+                                <label for="lpa_unit">Lp(a) Unit</label>
+                                <select id="lpa_unit" name="lpa_unit">
+                                    <option value="nmol/L" selected>nmol/L (≥125 high)</option>
+                                    <option value="mg/dL">mg/dL (≥50 high)</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="form-actions space-between mt-l">
@@ -323,7 +344,7 @@
             <section id="results-dashboard" class="hidden">
                 
                 <div class="dashboard-header">
-                    <h2>Your Health Assessment Report</h2>
+                    <h2>2026 ACC/AHA Dyslipidemia Clinical Evaluation Report</h2>
                     <button class="btn print-btn" onclick="window.print()"><i class="fas fa-print"></i> Export / Print</button>
                 </div>
 
@@ -359,9 +380,55 @@
                     </div>
                 </div>
 
+                <!-- 2026 ACC/AHA Guideline Highlights & PREVENT Risk Section -->
+                <div id="guideline-2026-section" class="card mt-m">
+                    <h3><i class="fas fa-heart-pulse"></i> 2026 ACC/AHA Key Recommendation Highlights</h3>
+                    <div class="guideline-grid mt-s">
+                        <!-- PREVENT Calculator Card -->
+                        <div class="guideline-card" id="prevent-risk-card">
+                            <div class="card-icon"><i class="fas fa-calculator"></i></div>
+                            <h4>PREVENT™ Risk Calculator</h4>
+                            <div id="prevent-risk-display">
+                                <span class="text-muted">Requires age 30-79 without known ASCVD</span>
+                            </div>
+                            <span class="cor-badge">COR 1 | LOE B-NR</span>
+                        </div>
+
+                        <!-- Lipoprotein(a) Card -->
+                        <div class="guideline-card" id="lpa-card">
+                            <div class="card-icon"><i class="fas fa-vial-virus"></i></div>
+                            <h4>Lipoprotein(a) [Lp(a)]</h4>
+                            <div id="lpa-display">
+                                <p>Measure Lp(a) at least once in all adults for ASCVD risk assessment (Cutoff: ≥125 nmol/L or ≥50 mg/dL).</p>
+                            </div>
+                            <span class="cor-badge">COR 1 | LOE B-NR</span>
+                        </div>
+
+                        <!-- CAC Scoring Card -->
+                        <div class="guideline-card" id="cac-card">
+                            <div class="card-icon"><i class="fas fa-x-ray"></i></div>
+                            <h4>Coronary Artery Calcium (CAC)</h4>
+                            <div id="cac-display">
+                                <p>Recommended for adults with 10-yr risk ≥3% (males ≥40y, females ≥45y) with uncertainty about LLT initiation/intensification.</p>
+                            </div>
+                            <span class="cor-badge">COR 1 | LOE B-R</span>
+                        </div>
+
+                        <!-- Therapy Escalation Card -->
+                        <div class="guideline-card" id="escalation-card">
+                            <div class="card-icon"><i class="fas fa-pills"></i></div>
+                            <h4>LLT Escalation Targets</h4>
+                            <div id="escalation-display">
+                                <p>In clinical ASCVD not at target: Add Ezetimibe, PCSK9 inhibitors, or Bempedoic Acid.</p>
+                            </div>
+                            <span class="cor-badge">COR 1-2</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Lipid Breakdown (Only if blood test data provided) -->
                 <div id="lipid-breakdown-section" class="card mt-m hidden">
-                    <h3><i class="fas fa-flask"></i> Clinical Lipid Breakdown</h3>
+                    <h3><i class="fas fa-flask"></i> Clinical Lipid Breakdown (LDL-C & Non-HDL-C Targets)</h3>
                     <div class="lipid-table-responsive">
                         <table class="lipid-table">
                             <thead>
@@ -376,6 +443,28 @@
                                 <!-- Injected by JS -->
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- Retesting & Lifetime Screening Protocol -->
+                <div class="card mt-m schedule-card">
+                    <h3><i class="fas fa-calendar-check"></i> Recommended Screening & Retesting Schedule</h3>
+                    <div class="schedule-grid mt-s">
+                        <div class="schedule-item">
+                            <div class="schedule-badge">Retesting</div>
+                            <strong>4–12 Weeks</strong>
+                            <p>Repeat lipid profile after LLT initiation or dose adjustment.</p>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-badge">Maintenance</div>
+                            <strong>6–12 Months</strong>
+                            <p>Routine lipid testing to assess ongoing therapeutic response.</p>
+                        </div>
+                        <div class="schedule-item">
+                            <div class="schedule-badge">Screening</div>
+                            <strong>Age 9–11 & q5yr from 19</strong>
+                            <p>Universal screening at age 9–11, then every 5 years from age 19 (more frequent if risk enhancers present).</p>
+                        </div>
                     </div>
                 </div>
 
@@ -415,7 +504,7 @@
         </main>
         
         <footer>
-            <p>&copy; 2026 LipidWise AI Hackathon Prototype.</p>
+            <p>&copy; 2026 LipidWise AI Hackathon Prototype. Sourced from the 2026 ACC/AHA Dyslipidemia Guideline Update.</p>
         </footer>
     </div>
 
