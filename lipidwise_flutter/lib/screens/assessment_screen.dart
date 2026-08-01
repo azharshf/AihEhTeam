@@ -69,9 +69,32 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   }
 
   void _scanBukuRekod() async {
+    // Let user choose Camera or Gallery
+    final ImageSource? source = await showDialog<ImageSource>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Select Image Source'),
+        content: const Text('Capture a new photo or upload from gallery?'),
+        actions: [
+          TextButton.icon(
+            icon: const Icon(Icons.photo_library),
+            label: const Text('Gallery'),
+            onPressed: () => Navigator.pop(ctx, ImageSource.gallery),
+          ),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.camera_alt),
+            label: const Text('Camera'),
+            onPressed: () => Navigator.pop(ctx, ImageSource.camera),
+          ),
+        ],
+      ),
+    );
+
+    if (source == null) return; // User cancelled the dialog
+
     try {
       final ImagePicker picker = ImagePicker();
-      await picker.pickImage(source: ImageSource.gallery);
+      await picker.pickImage(source: source);
     } catch (e) {
       debugPrint('ImagePicker bypassed or error: $e');
     }
