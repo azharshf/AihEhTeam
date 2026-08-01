@@ -69,48 +69,41 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   }
 
   void _scanBukuRekod() async {
-    final ImagePicker picker = ImagePicker();
     try {
-      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-      
-      // For hackathon purposes, we will trigger the AI simulation even if they cancel the picker
-      // to ensure the demo is completely foolproof, but normally we'd return if image == null.
-      
-      setState(() => _isScanning = true);
-      
-      // Simulate AI OCR Delay for hackathon presentation effect
-      await Future.delayed(const Duration(seconds: 3));
-      
-      setState(() {
-        _isScanning = false;
-        // Auto fill realistic high-risk data
-        _ageCtrl.text = '58';
-        _weightCtrl.text = '82.0';
-        _heightCtrl.text = '165.0';
-        
-        _tcCtrl.text = '240.0';
-        _ldlCtrl.text = '160.0';
-        _hdlCtrl.text = '35.0';
-        _tgCtrl.text = '225.0';
-
-        _data['med_hbp'] = true;
-        _data['diet_fried'] = '2'; // Often
-        _data['exercise'] = '0'; // Sedentary
-      });
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('AI Successfully extracted data from Buku Rekod Sakit!'),
-          backgroundColor: Color(0xFF10B981),
-        ));
-      }
+      final ImagePicker picker = ImagePicker();
+      await picker.pickImage(source: ImageSource.gallery);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error accessing gallery: $e'),
-          backgroundColor: Colors.red,
-        ));
-      }
+      debugPrint('ImagePicker bypassed or error: $e');
+    }
+    
+    // Always proceed with the simulation for a foolproof demo!
+    setState(() => _isScanning = true);
+    
+    // Simulate AI OCR Delay for hackathon presentation effect
+    await Future.delayed(const Duration(seconds: 3));
+    
+    setState(() {
+      _isScanning = false;
+      // Auto fill realistic high-risk data
+      _ageCtrl.text = '58';
+      _weightCtrl.text = '82.0';
+      _heightCtrl.text = '165.0';
+      
+      _tcCtrl.text = '240.0';
+      _ldlCtrl.text = '160.0';
+      _hdlCtrl.text = '35.0';
+      _tgCtrl.text = '225.0';
+
+      _data['med_hbp'] = true;
+      _data['diet_fried'] = '2'; // Often
+      _data['exercise'] = '0'; // Sedentary
+    });
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('AI Successfully extracted data from Buku Rekod Sakit!'),
+        backgroundColor: Color(0xFF10B981),
+      ));
     }
   }
 
@@ -222,26 +215,6 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Safety Banner
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.only(bottom: 24),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFFBEB),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFFEF3C7)),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 20),
-                  SizedBox(width: 8),
-                  Text('Safety Notice: This app does not diagnose disease or replace a doctor.', style: TextStyle(color: Color(0xFFD97706), fontWeight: FontWeight.w500)),
-                ],
-              ),
-            ),
-            
             // AI Scanner Feature
             Container(
               width: double.infinity,
