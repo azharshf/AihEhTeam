@@ -70,9 +70,12 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
 
   void _scanBukuRekod() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    
-    if (image != null) {
+    try {
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      
+      // For hackathon purposes, we will trigger the AI simulation even if they cancel the picker
+      // to ensure the demo is completely foolproof, but normally we'd return if image == null.
+      
       setState(() => _isScanning = true);
       
       // Simulate AI OCR Delay for hackathon presentation effect
@@ -99,6 +102,13 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('AI Successfully extracted data from Buku Rekod Sakit!'),
           backgroundColor: Color(0xFF10B981),
+        ));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error accessing gallery: $e'),
+          backgroundColor: Colors.red,
         ));
       }
     }
