@@ -13,12 +13,20 @@ class AuthService {
         GoogleAuthProvider authProvider = GoogleAuthProvider();
         return await _auth.signInWithPopup(authProvider);
       } else {
-        // For native, usually google_sign_in is required, but we are targeting Web for this hackathon deploy.
         print('Native Google Sign-In requires google_sign_in package configuration.');
         return null;
       }
     } catch (e) {
       print('Error signing in with Google: $e');
+      return null;
+    }
+  }
+
+  Future<UserCredential?> signInWithEmail(String email, String password) async {
+    try {
+      return await _auth.signInWithEmailAndPassword(email: email, password: password);
+    } catch (e) {
+      print('Error signing in with Email/Password: $e');
       return null;
     }
   }

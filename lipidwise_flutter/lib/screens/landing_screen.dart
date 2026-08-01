@@ -1,25 +1,33 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import 'main_layout.dart';
+import 'doctor_login_screen.dart';
 
 class LandingScreen extends StatelessWidget {
   const LandingScreen({super.key});
 
-  void _signInAndProceed(BuildContext context, String role) async {
+  void _signInPatient(BuildContext context) async {
     final AuthService auth = AuthService();
     final user = await auth.signInWithGoogle();
     if (user != null) {
       if (context.mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => MainLayout(role: role)),
+          MaterialPageRoute(builder: (context) => const MainLayout(role: 'Patient')),
         );
       }
     } else {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to sign in. Please try again.')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to sign in via Google. Make sure it is enabled in Firebase Console.')));
       }
     }
+  }
+
+  void _goToDoctorLogin(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const DoctorLoginScreen()),
+    );
   }
 
   @override
@@ -47,18 +55,18 @@ class LandingScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: () => _signInAndProceed(context, 'Patient'),
+                onPressed: () => _signInPatient(context),
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 icon: const Icon(Icons.medical_services, color: Color(0xFF0F172A)),
-                label: const Text('Sign in as Doctor (Google)', style: TextStyle(color: Color(0xFF0F172A), fontSize: 16)),
+                label: const Text('Doctor Portal Login', style: TextStyle(color: Color(0xFF0F172A), fontSize: 16)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: () => _signInAndProceed(context, 'Doctor'),
+                onPressed: () => _goToDoctorLogin(context),
               ),
             ],
           ),

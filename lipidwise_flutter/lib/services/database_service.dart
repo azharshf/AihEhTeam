@@ -6,7 +6,7 @@ class DatabaseService {
 
   Future<void> saveAssessment(Map<String, dynamic> rawData, Map<String, dynamic> resultData, String role) async {
     User? user = FirebaseAuth.instance.currentUser;
-    if (user == null) return; // Only save if logged in
+    if (user == null) return;
 
     try {
       await _db.collection('assessments').add({
@@ -20,5 +20,9 @@ class DatabaseService {
     } catch (e) {
       print('Error saving to Firestore: $e');
     }
+  }
+
+  Stream<QuerySnapshot> getAssessmentsStream() {
+    return _db.collection('assessments').orderBy('timestamp', descending: true).snapshots();
   }
 }

@@ -3,6 +3,7 @@ import '../services/auth_service.dart';
 import 'assessment_screen.dart';
 import 'dashboard_screen.dart';
 import 'landing_screen.dart';
+import 'doctor_dashboard_screen.dart';
 
 class MainLayout extends StatefulWidget {
   final String role;
@@ -84,18 +85,26 @@ class _MainLayoutState extends State<MainLayout> {
                 ),
               ),
             ),
-            destinations: const [
-              NavigationRailDestination(
-                icon: Icon(Icons.assignment_ind_outlined),
-                selectedIcon: Icon(Icons.assignment_ind),
-                label: Text('Patient Intake'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.pie_chart_outline),
-                selectedIcon: Icon(Icons.pie_chart),
-                label: Text('Risk Dashboard'),
-              ),
-            ],
+            destinations: widget.role == 'Doctor' 
+              ? const [
+                  NavigationRailDestination(
+                    icon: Icon(Icons.people_outline),
+                    selectedIcon: Icon(Icons.people),
+                    label: Text('All Patients'),
+                  ),
+                ]
+              : const [
+                  NavigationRailDestination(
+                    icon: Icon(Icons.assignment_ind_outlined),
+                    selectedIcon: Icon(Icons.assignment_ind),
+                    label: Text('Patient Intake'),
+                  ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.pie_chart_outline),
+                    selectedIcon: Icon(Icons.pie_chart),
+                    label: Text('Risk Dashboard'),
+                  ),
+                ],
             selectedIconTheme: const IconThemeData(color: Color(0xFF2563eb)),
             selectedLabelTextStyle: const TextStyle(color: Color(0xFF2563eb), fontWeight: FontWeight.w600),
           ),
@@ -118,7 +127,9 @@ class _MainLayoutState extends State<MainLayout> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        _selectedIndex == 0 ? 'Patient Intake Form' : 'Risk Dashboard',
+                        widget.role == 'Doctor' 
+                          ? 'Doctor Dashboard'
+                          : (_selectedIndex == 0 ? 'Patient Intake Form' : 'Risk Dashboard'),
                         style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
                       ),
                       Row(
@@ -136,32 +147,35 @@ class _MainLayoutState extends State<MainLayout> {
                 ),
                 
                 // Disclaimer Banner
-                Container(
-                  width: double.infinity,
-                  color: const Color(0xFFFFFBEB),
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.warning_amber_rounded, color: Color(0xFFB45309), size: 16),
-                      SizedBox(width: 8),
-                      Text(
-                        'Safety Notice: This app does not diagnose disease or replace a doctor.',
-                        style: TextStyle(color: Color(0xFF92400E), fontSize: 13, fontWeight: FontWeight.w500),
-                      ),
-                    ],
+                if (widget.role != 'Doctor')
+                  Container(
+                    width: double.infinity,
+                    color: const Color(0xFFFFFBEB),
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.warning_amber_rounded, color: Color(0xFFB45309), size: 16),
+                        SizedBox(width: 8),
+                        Text(
+                          'Safety Notice: This app does not diagnose disease or replace a doctor.',
+                          style: TextStyle(color: Color(0xFF92400E), fontSize: 13, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
                 
                 // Dynamic Content
                 Expanded(
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
-                    child: _selectedIndex == 0 
-                      ? AssessmentScreen(role: widget.role, onResult: _onResultGenerated)
-                      : (_lastResult == null 
-                          ? const Center(child: Text('No patient data assessed yet. Go to Patient Intake.'))
-                          : DashboardScreen(result: _lastResult!, role: widget.role)),
+                    child: widget.role == 'Doctor' 
+                      ? DoctorDashboardScreen()
+                      : (_selectedIndex == 0 
+                          ? AssessmentScreen(role: widget.role, onResult: _onResultGenerated)
+                          : (_lastResult == null 
+                              ? const Center(child: Text('No patient data assessed yet. Go to Patient Intake.'))
+                              : DashboardScreen(result: _lastResult!, role: widget.role))),
                   ),
                 ),
               ],
