@@ -1,0 +1,34 @@
+DANGER ZONE CRITERIA FOR LIPID LEVELS
+
+These criteria help identify when a user should be advised to seek professional medical care. This does not diagnose the user.
+
+LDL-C (Low-Density Lipoprotein Cholesterol):
+- Optimal: Less than 100 mg/dL (2.6 mmol/L)
+- Near optimal: 100-129 mg/dL (2.6-3.3 mmol/L)
+- Borderline high: 130-159 mg/dL (3.4-4.0 mmol/L)
+- High: 160-189 mg/dL (4.1-4.9 mmol/L)
+- Very high / Danger zone: 190 mg/dL or above (4.9 mmol/L or above) — Recommend doctor review. Strong recommendation for statin therapy according to 2026 guidelines.
+
+HDL-C (High-Density Lipoprotein Cholesterol):
+- Low (men): Less than 40 mg/dL (1.0 mmol/L) — Moderate concern, higher cardiovascular risk.
+- Low (women): Less than 50 mg/dL (1.3 mmol/L) — Moderate concern, higher cardiovascular risk.
+- Desirable: 60 mg/dL or above (1.6 mmol/L or above)
+
+Triglycerides:
+- Normal: Less than 150 mg/dL (1.7 mmol/L)
+- Borderline high: 150-199 mg/dL (1.7-2.2 mmol/L)
+- High: 200-499 mg/dL (2.3-5.6 mmol/L)
+- Very high / Danger zone: 500 mg/dL or above (5.6 mmol/L or above) — Warn about pancreatitis risk, recommend medical review.
+- Emergency: 1000 mg/dL or above (11.3 mmol/L or above) — Recommend urgent medical care.
+
+Total Cholesterol:
+- Desirable: Less than 200 mg/dL (5.2 mmol/L)
+- Borderline high: 200-239 mg/dL (5.2-6.2 mmol/L)
+- High / Danger zone: 240 mg/dL or above (6.2 mmol/L or above) — Recommend medical review and lifestyle action.
+
+RISK CATEGORIES:
+- Low concern: All lipid levels within normal range, few risk factors.
+- Moderate concern: One or more borderline-high values, or presence of risk factors like smoking, obesity, family history.
+- High concern: LDL-C >= 190 mg/dL, or triglycerides >= 500 mg/dL, or multiple high-risk factors.
+- Very high concern: Triglycerides >= 1000 mg/dL, or combination of danger-zone values.
+- Emergency warning: Chest pain, stroke symptoms, severe abdominal pain, severe shortness of breath.

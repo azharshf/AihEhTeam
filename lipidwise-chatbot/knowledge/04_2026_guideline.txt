@@ -1,0 +1,30 @@
+2026 DYSLIPIDEMIA GUIDELINE FOR PRIMARY PREVENTION STATIN THERAPY
+
+Published July 20, 2026. The 2026 guideline personalizes statin therapy using LDL-C levels, ASCVD risk, diabetes, CKD, and HIV to match intensity to benefit.
+
+TARGET POPULATION: Nonpregnant adults aged 30-79 years without known ASCVD (atherosclerotic cardiovascular disease). This covers approximately 154.5 million people (100%).
+
+POPULATIONS ALREADY ON LIPID-LOWERING THERAPY: 27.6 million (17.8%) are already taking lipid-lowering therapy.
+
+UNTREATED LDL-C BELOW 70 mg/dL: 8.6 million (5.5%) — Statin NOT recommended.
+
+POPULATIONS RECOMMENDED STATINS INDEPENDENT OF ASCVD RISK (13.3 million, 8.6%):
+1. LDL-C >= 190 mg/dL: 3.6 million (2.3%) — STRONG recommendation for statin therapy.
+2. Diabetes mellitus, aged 40-75: 7.8 million (5.0%) — STRONG recommendation.
+3. CKD Stage >= 3, aged 40-75: 2.0 million (1.3%) — STRONG recommendation.
+4. HIV infection, aged 40-75: risk not estimated — STRONG recommendation.
+
+POPULATIONS RECOMMENDED 10-YEAR RISK ESTIMATION USING PREVENT-ASCVD EQUATIONS (105.1 million, 68.0%):
+1. High risk (>=10% 10-year risk): 3.2 million (2.0%) — STRONG recommendation.
+2. Intermediate risk (5% to <10% 10-year risk): 11.4 million (7.4%) — STRONG recommendation.
+3. Borderline risk (3% to <5% 10-year risk): 12.9 million (8.4%) — MODERATE recommendation.
+4. LDL-C 160-189 mg/dL: 5.4 million (3.5%) — MODERATE recommendation.
+
+LOW RISK (<3% 10-year risk): 77.6 million (50.2%):
+- Risk >=10%: 13.7 million (8.8%) — MODERATE recommendation.
+- Risk <10% AND LDL-C 160-189 mg/dL: 58.5 million (37.9%) — Statin NOT recommended.
+- Risk <10% AND LDL-C <160 mg/dL: 31.5 million (21.6%) — Statin NOT recommended.
+
+KEY PRINCIPLE: Personalized assessment. Evidence-based decisions. The right patient, the right intensity, the best outcome.
+
+ASCVD RISK FACTORS include: age, sex, race, total cholesterol, HDL cholesterol, systolic blood pressure, blood pressure treatment, diabetes, smoking status, and estimated GFR.

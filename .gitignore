@@ -1,0 +1,16 @@
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Secrets — never commit API keys
+.env
+.env.local
+
+# Python (in case any subfolder isn't covered by its own .gitignore)
+.venv/
+__pycache__/
+*.pyc

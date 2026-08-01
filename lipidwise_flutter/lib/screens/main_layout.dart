@@ -4,6 +4,7 @@ import 'assessment_screen.dart';
 import 'dashboard_screen.dart';
 import 'landing_screen.dart';
 import 'doctor_dashboard_screen.dart';
+import 'chat_screen.dart';
 
 class MainLayout extends StatefulWidget {
   final String role;
@@ -104,6 +105,11 @@ class _MainLayoutState extends State<MainLayout> {
                     selectedIcon: Icon(Icons.pie_chart),
                     label: Text('Risk Dashboard'),
                   ),
+                  NavigationRailDestination(
+                    icon: Icon(Icons.chat_bubble_outline),
+                    selectedIcon: Icon(Icons.chat_bubble),
+                    label: Text('AI Chat'),
+                  ),
                 ],
             selectedIconTheme: const IconThemeData(color: Color(0xFF2563eb)),
             selectedLabelTextStyle: const TextStyle(color: Color(0xFF2563eb), fontWeight: FontWeight.w600),
@@ -127,9 +133,11 @@ class _MainLayoutState extends State<MainLayout> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        widget.role == 'Doctor' 
+                        widget.role == 'Doctor'
                           ? 'Doctor Dashboard'
-                          : (_selectedIndex == 0 ? 'Patient Intake Form' : 'Risk Dashboard'),
+                          : (_selectedIndex == 0
+                              ? 'Patient Intake Form'
+                              : (_selectedIndex == 1 ? 'Risk Dashboard' : 'AI Chat')),
                         style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
                       ),
                       Row(
@@ -169,13 +177,15 @@ class _MainLayoutState extends State<MainLayout> {
                 Expanded(
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
-                    child: widget.role == 'Doctor' 
+                    child: widget.role == 'Doctor'
                       ? DoctorDashboardScreen()
-                      : (_selectedIndex == 0 
+                      : (_selectedIndex == 0
                           ? AssessmentScreen(role: widget.role, onResult: _onResultGenerated)
-                          : (_lastResult == null 
-                              ? const Center(child: Text('No patient data assessed yet. Go to Patient Intake.'))
-                              : DashboardScreen(result: _lastResult!, role: widget.role))),
+                          : (_selectedIndex == 1
+                              ? (_lastResult == null
+                                  ? const Center(child: Text('No patient data assessed yet. Go to Patient Intake.'))
+                                  : DashboardScreen(result: _lastResult!, role: widget.role))
+                              : const ChatScreen())),
                   ),
                 ),
               ],

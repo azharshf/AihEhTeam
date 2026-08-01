@@ -1,0 +1,10 @@
+fastapi==0.115.0
+uvicorn==0.30.0
+chromadb==0.5.0
+# chromadb 0.5.0 uses np.float_, which NumPy 2.0 removed. Must stay on 1.x.
+numpy<2
+# openai 1.40.0's http client wrapper passes proxies=, which httpx 0.28 dropped.
+httpx<0.28
+openai==1.40.0
+python-dotenv==1.0.1
+python-multipart==0.0.9

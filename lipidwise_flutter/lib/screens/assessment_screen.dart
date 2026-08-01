@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../engine/rules_engine.dart';
 import '../engine/ml_model.dart';
 import '../engine/lifestyle_coach.dart';
 import '../services/database_service.dart';
+import '../services/chat_service.dart';
 
 class AssessmentScreen extends StatefulWidget {
   final String role;
@@ -16,6 +18,7 @@ class AssessmentScreen extends StatefulWidget {
 class _AssessmentScreenState extends State<AssessmentScreen> {
   final _formKey = GlobalKey<FormState>();
   final DatabaseService _db = DatabaseService();
+  final ChatService _chat = ChatService();
 
   // Data Map
   final Map<String, dynamic> _data = {
@@ -118,8 +121,54 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     // Save to Firestore
     await _db.saveAssessment(_data, result, widget.role);
 
+    // Sync to LipidWise AI chatbot backend so it has patient context
+    final sessionId = FirebaseAuth.instance.currentUser?.uid;
+    if (sessionId != null) {
+      try {
+        await _chat.syncPatientProfile(sessionId: sessionId, profile: _toChatProfile());
+      } catch (_) {
+        // Chatbot backend may be offline — assessment flow should not block on it.
+      }
+    }
+
     // Call callback to switch tabs
     widget.onResult(result);
+  }
+
+  /// Maps the intake form's internal field names to the chatbot backend's
+  /// PatientProfileRequest schema (lipidwise-chatbot/main.py).
+  Map<String, dynamic> _toChatProfile() {
+    return {
+      'age': _data['age'],
+      'sex': _data['sex'],
+      'weight_kg': _data['weight'],
+      'height_cm': _data['height'],
+      'ldl_c': _data['ldl'],
+      'hdl_c': _data['hdl'],
+      'triglycerides': _data['tg'],
+      'total_cholesterol': _data['tc'],
+      'smoker': _data['smoking'] == true || _data['smoking'] == '1',
+      'exercise_mins_per_week': _exerciseMinsFromLevel(_data['exercise']),
+      'has_diabetes': _data['med_diabetes'] == true,
+      'has_hypertension': _data['med_hbp'] == true,
+      'has_family_history_heart': _data['fam_cvd'] == true,
+      'has_family_history_cholesterol': _data['fam_cholesterol'] == true,
+    }..removeWhere((key, value) => value == null);
+  }
+
+  int? _exerciseMinsFromLevel(dynamic level) {
+    switch (level) {
+      case '0':
+        return 0;
+      case '1':
+        return 90; // Light: 1-2 days/week, ~45min each
+      case '2':
+        return 210; // Moderate: 3-4 days/week
+      case '3':
+        return 300; // Active: 5+ days/week
+      default:
+        return null;
+    }
   }
 
   Widget _buildCard(String title, IconData icon, Widget child, {Color? color, Color? iconColor}) {
