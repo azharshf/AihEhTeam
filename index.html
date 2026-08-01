@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LipidWise AI | Preventive Dyslipidemia System</title>
+    <meta name="description" content="An AI-based dyslipidemia prevention system for early risk awareness, lipid result explanation, and personalized lifestyle coaching.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Floating Disclaimer -->
+        <div class="disclaimer-banner">
+            <i class="fas fa-info-circle"></i> 
+            <strong>Disclaimer:</strong> This app does not diagnose disease or replace a doctor. It helps understand risk factors, explain results, and encourage healthy choices.
+        </div>
+
+        <header class="app-header">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-heartbeat"></i></div>
+                <h1>LipidWise <span>AI</span></h1>
+            </div>
+            <div class="header-actions">
+                <button id="theme-toggle" class="icon-btn" aria-label="Toggle Theme"><i class="fas fa-moon"></i></button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Progress Tracker -->
+            <div class="progress-container" id="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+                <div class="steps-indicator">
+                    <div class="step active" data-step="1">1</div>
+                    <div class="step" data-step="2">2</div>
+                    <div class="step" data-step="3">3</div>
+                    <div class="step" data-step="4">4</div>
+                    <div class="step" data-step="5">5</div>
+                </div>
+            </div>
+
+            <!-- Form Section -->
+            <section id="assessment-form" class="card form-card">
+                <form id="lipid-form">
+                    
+                    <!-- Step 1: Emergency & Warning Signs -->
+                    <div class="form-step active" id="step-1">
+                        <h2><i class="fas fa-exclamation-triangle warning-icon"></i> Emergency & Warning Signs</h2>
+                        <p class="subtitle">Please check any symptoms you are currently experiencing.</p>
+                        
+                        <div class="checkbox-grid">
+                            <label class="custom-checkbox danger-check">
+                                <input type="checkbox" name="symptom_chest_pain" value="yes">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Chest pain or discomfort</span>
+                            </label>
+                            <label class="custom-checkbox danger-check">
+                                <input type="checkbox" name="symptom_stroke" value="yes">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Face drooping, arm weakness, trouble speaking (Stroke signs)</span>
+                            </label>
+                            <label class="custom-checkbox danger-check">
+                                <input type="checkbox" name="symptom_sob" value="yes">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Severe shortness of breath</span>
+                            </label>
+                            <label class="custom-checkbox danger-check">
+                                <input type="checkbox" name="symptom_abdomen" value="yes">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Severe upper abdominal pain / nausea</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="symptom_eyes" value="yes">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Yellowish patches around eyelids (Xanthelasma)</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="symptom_skin" value="yes">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Fatty lumps on skin or tendons (Xanthomas)</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="symptom_none" id="symptom_none" value="yes">
+                                <span class="checkmark"></span>
+                                <span class="check-text">None of the above</span>
+                            </label>
+                        </div>
+                        
+                        <div id="emergency-alert" class="alert danger-alert hidden">
+                            <i class="fas fa-ambulance"></i>
+                            <div>
+                                <strong>EMERGENCY WARNING</strong>
+                                <p>Your symptoms may be urgent. Please seek emergency medical care immediately.</p>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn primary-btn next-btn" data-next="2">Next Step <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Basic Body Data -->
+                    <div class="form-step" id="step-2">
+                        <h2><i class="fas fa-user"></i> Basic Body Profile</h2>
+                        <p class="subtitle">Help us understand your baseline metrics.</p>
+
+                        <div class="input-grid">
+                            <div class="input-group">
+                                <label for="age">Age (Years)</label>
+                                <input type="number" id="age" name="age" min="18" max="120" required placeholder="e.g. 45">
+                            </div>
+                            <div class="input-group">
+                                <label for="sex">Biological Sex</label>
+                                <select id="sex" name="sex" required>
+                                    <option value="" disabled selected>Select...</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="height">Height (cm)</label>
+                                <input type="number" id="height" name="height" min="100" max="250" required placeholder="e.g. 170">
+                            </div>
+                            <div class="input-group">
+                                <label for="weight">Weight (kg)</label>
+                                <input type="number" id="weight" name="weight" min="30" max="300" required placeholder="e.g. 75">
+                            </div>
+                        </div>
+
+                        <div class="calculated-metrics">
+                            <div class="metric-card" id="bmi-card">
+                                <span class="metric-label">Estimated BMI</span>
+                                <span class="metric-value" id="bmi-display">--</span>
+                                <span class="metric-desc" id="bmi-category">Enter height & weight</span>
+                            </div>
+                        </div>
+
+                        <div class="form-actions space-between">
+                            <button type="button" class="btn secondary-btn prev-btn" data-prev="1"><i class="fas fa-arrow-left"></i> Back</button>
+                            <button type="button" class="btn primary-btn next-btn" data-next="3">Next Step <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Lifestyle & Habits -->
+                    <div class="form-step" id="step-3">
+                        <h2><i class="fas fa-leaf"></i> Lifestyle & Habits</h2>
+                        <p class="subtitle">Your daily routines affect your lipid levels.</p>
+
+                        <div class="lifestyle-grid">
+                            <!-- Smoking -->
+                            <div class="habit-group">
+                                <label>Smoking / Vaping</label>
+                                <div class="radio-group">
+                                    <input type="radio" id="smoke_no" name="smoking" value="0" checked>
+                                    <label for="smoke_no">Never / Quit</label>
+                                    
+                                    <input type="radio" id="smoke_yes" name="smoking" value="1">
+                                    <label for="smoke_yes">Current Smoker</label>
+                                </div>
+                            </div>
+
+                            <!-- Exercise -->
+                            <div class="habit-group">
+                                <label>Physical Activity (per week)</label>
+                                <select name="exercise" required>
+                                    <option value="0">Sedentary (Rarely exercise)</option>
+                                    <option value="1">Light (1-2 days)</option>
+                                    <option value="2">Moderate (3-4 days)</option>
+                                    <option value="3">Active (5+ days)</option>
+                                </select>
+                            </div>
+
+                            <!-- Diet: Fried Food -->
+                            <div class="habit-group">
+                                <label>Fried / Fast Food (e.g. Fried Chicken, Fries)</label>
+                                <select name="diet_fried" required>
+                                    <option value="0">Rarely (0-1 times/wk)</option>
+                                    <option value="1">Sometimes (2-3 times/wk)</option>
+                                    <option value="2">Often (4+ times/wk)</option>
+                                </select>
+                            </div>
+
+                            <!-- Diet: Sugary Drinks -->
+                            <div class="habit-group">
+                                <label>Sugary Drinks (e.g. Soda, Boba, Sweet Tea)</label>
+                                <select name="diet_sugar" required>
+                                    <option value="0">Rarely</option>
+                                    <option value="1">A few times a week</option>
+                                    <option value="2">Daily</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Alcohol -->
+                            <div class="habit-group">
+                                <label>Alcohol Intake</label>
+                                <select name="alcohol" required>
+                                    <option value="0">None / Occasional</option>
+                                    <option value="1">Moderate (1-2 drinks/day)</option>
+                                    <option value="2">Heavy (3+ drinks/day)</option>
+                                </select>
+                            </div>
+
+                            <!-- Stress -->
+                            <div class="habit-group">
+                                <label>Chronic Stress Level</label>
+                                <div class="radio-group">
+                                    <input type="radio" id="stress_low" name="stress" value="0" checked>
+                                    <label for="stress_low">Low</label>
+                                    
+                                    <input type="radio" id="stress_med" name="stress" value="1">
+                                    <label for="stress_med">Moderate</label>
+                                    
+                                    <input type="radio" id="stress_high" name="stress" value="2">
+                                    <label for="stress_high">High</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions space-between">
+                            <button type="button" class="btn secondary-btn prev-btn" data-prev="2"><i class="fas fa-arrow-left"></i> Back</button>
+                            <button type="button" class="btn primary-btn next-btn" data-next="4">Next Step <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Medical History -->
+                    <div class="form-step" id="step-4">
+                        <h2><i class="fas fa-notes-medical"></i> Medical & Family History</h2>
+                        <p class="subtitle">Check any conditions you or your immediate family have.</p>
+
+                        <div class="checkbox-grid">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="med_diabetes" value="1">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Diabetes / High Blood Sugar</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="med_hbp" value="1">
+                                <span class="checkmark"></span>
+                                <span class="check-text">High Blood Pressure (Hypertension)</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="med_cvd" value="1">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Previous Heart Disease / Stroke</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="med_fatty_liver" value="1">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Fatty Liver Disease</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="fam_cholesterol" value="1">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Family History of High Cholesterol</span>
+                            </label>
+                            <label class="custom-checkbox">
+                                <input type="checkbox" name="fam_cvd" value="1">
+                                <span class="checkmark"></span>
+                                <span class="check-text">Family History of Early Heart Attack/Stroke</span>
+                            </label>
+                        </div>
+
+                        <div class="form-actions space-between">
+                            <button type="button" class="btn secondary-btn prev-btn" data-prev="3"><i class="fas fa-arrow-left"></i> Back</button>
+                            <button type="button" class="btn primary-btn next-btn" data-next="5">Next Step <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Lipid Profile Data -->
+                    <div class="form-step" id="step-5">
+                        <h2><i class="fas fa-vial"></i> Lipid Profile Results (Optional)</h2>
+                        <p class="subtitle">If you have recent blood test results, enter them here for high-accuracy rule-based analysis. If not, skip and we'll estimate your risk using Machine Learning.</p>
+
+                        <div class="unit-toggle-wrapper">
+                            <span>Preferred Unit: </span>
+                            <div class="toggle-pill">
+                                <input type="radio" id="unit_mgdl" name="lipid_unit" value="mg/dL" checked>
+                                <label for="unit_mgdl">mg/dL</label>
+                                <input type="radio" id="unit_mmol" name="lipid_unit" value="mmol/L">
+                                <label for="unit_mmol">mmol/L</label>
+                                <div class="pill-slider"></div>
+                            </div>
+                        </div>
+
+                        <div class="input-grid lipid-inputs">
+                            <div class="input-group">
+                                <label for="tc">Total Cholesterol <span class="unit-label">(mg/dL)</span></label>
+                                <input type="number" id="tc" name="tc" step="0.1" placeholder="e.g. 190">
+                            </div>
+                            <div class="input-group">
+                                <label for="ldl">LDL-C (Bad) <span class="unit-label">(mg/dL)</span></label>
+                                <input type="number" id="ldl" name="ldl" step="0.1" placeholder="e.g. 110">
+                            </div>
+                            <div class="input-group">
+                                <label for="hdl">HDL-C (Good) <span class="unit-label">(mg/dL)</span></label>
+                                <input type="number" id="hdl" name="hdl" step="0.1" placeholder="e.g. 50">
+                            </div>
+                            <div class="input-group">
+                                <label for="tg">Triglycerides <span class="unit-label">(mg/dL)</span></label>
+                                <input type="number" id="tg" name="tg" step="0.1" placeholder="e.g. 140">
+                            </div>
+                        </div>
+
+                        <div class="form-actions space-between mt-l">
+                            <button type="button" class="btn secondary-btn prev-btn" data-prev="4"><i class="fas fa-arrow-left"></i> Back</button>
+                            <button type="submit" class="btn cta-btn" id="analyze-btn">Analyze Results <i class="fas fa-magic"></i></button>
+                        </div>
+                    </div>
+
+                </form>
+            </section>
+
+            <!-- Results Dashboard Section -->
+            <section id="results-dashboard" class="hidden">
+                
+                <div class="dashboard-header">
+                    <h2>Your Health Assessment Report</h2>
+                    <button class="btn print-btn" onclick="window.print()"><i class="fas fa-print"></i> Export / Print</button>
+                </div>
+
+                <!-- Primary Alert Banner -->
+                <div id="primary-alert" class="alert result-alert">
+                    <i class="fas fa-info-circle"></i>
+                    <div id="alert-content">
+                        <strong>Analysis Complete</strong>
+                        <p>...</p>
+                    </div>
+                </div>
+
+                <!-- Risk Gauge Card -->
+                <div class="dashboard-grid">
+                    <div class="card gauge-card">
+                        <h3>Dyslipidemia Risk Level</h3>
+                        <div class="gauge-container">
+                            <div class="gauge">
+                                <div class="gauge-fill" id="risk-gauge-fill"></div>
+                                <div class="gauge-cover" id="risk-gauge-text">Loading...</div>
+                            </div>
+                        </div>
+                        <p id="risk-description" class="risk-desc text-center">...</p>
+                        <div id="analysis-type-badge" class="badge"></div>
+                    </div>
+
+                    <!-- Factors / Details Card -->
+                    <div class="card details-card" id="details-panel">
+                        <h3><i class="fas fa-chart-pie"></i> Risk Factor Analysis</h3>
+                        <div id="factors-list" class="factors-list">
+                            <!-- Factors injected by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lipid Breakdown (Only if blood test data provided) -->
+                <div id="lipid-breakdown-section" class="card mt-m hidden">
+                    <h3><i class="fas fa-flask"></i> Clinical Lipid Breakdown</h3>
+                    <div class="lipid-table-responsive">
+                        <table class="lipid-table">
+                            <thead>
+                                <tr>
+                                    <th>Marker</th>
+                                    <th>Your Value</th>
+                                    <th>Target Range</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lipid-table-body">
+                                <!-- Injected by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- AI Lifestyle Coach Section -->
+                <div class="card coach-card mt-m">
+                    <div class="coach-header">
+                        <div class="coach-icon"><i class="fas fa-robot"></i></div>
+                        <div>
+                            <h3>AI Prevention Coach</h3>
+                            <p>Personalized recommendations for a healthier profile.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="tabs mt-m">
+                        <button class="tab-btn active" data-tab="food-swaps">🍲 Asian Food Swaps</button>
+                        <button class="tab-btn" data-tab="action-plan">📅 7-Day Plan</button>
+                    </div>
+
+                    <div class="tab-content active" id="food-swaps">
+                        <div class="swaps-grid" id="swaps-container">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="action-plan">
+                        <ul class="timeline" id="plan-timeline">
+                            <!-- Injected by JS -->
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="text-center mt-l">
+                    <button id="retake-btn" class="btn secondary-btn"><i class="fas fa-redo"></i> Start New Assessment</button>
+                </div>
+
+            </section>
+        </main>
+        
+        <footer>
+            <p>&copy; 2026 LipidWise AI Hackathon Prototype.</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./js/rules_engine.js"></script>
+    <script src="./js/ml_model.js"></script>
+    <script src="./js/lifestyle_coach.js"></script>
+    <script src="./js/app.js"></script>
+</body>
+</html>
