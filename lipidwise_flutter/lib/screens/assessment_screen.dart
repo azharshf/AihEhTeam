@@ -19,12 +19,17 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   final DatabaseService _db = DatabaseService();
   bool _isScanning = false;
 
+  final TextEditingController _ageCtrl = TextEditingController(text: '30');
+  final TextEditingController _weightCtrl = TextEditingController(text: '70.0');
+  final TextEditingController _heightCtrl = TextEditingController(text: '170.0');
+  final TextEditingController _ldlCtrl = TextEditingController();
+  final TextEditingController _hdlCtrl = TextEditingController();
+  final TextEditingController _tgCtrl = TextEditingController();
+  final TextEditingController _tcCtrl = TextEditingController();
+
   // Data Map
   final Map<String, dynamic> _data = {
-    'age': 30,
     'sex': 'male',
-    'height': 170.0,
-    'weight': 70.0,
     'bmi': 24.2,
     
     'symptom_chest_pain': false,
@@ -49,20 +54,18 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
     'fam_cvd': false,
     
     'lipid_unit': 'mg/dL',
-    'tc': null,
-    'ldl': null,
-    'hdl': null,
-    'tg': null,
   };
 
-  void _calculateBMI() {
-    double h = _data['height'] / 100;
-    double w = _data['weight'];
-    if (h > 0) {
-      setState(() {
-        _data['bmi'] = w / (h * h);
-      });
-    }
+  @override
+  void dispose() {
+    _ageCtrl.dispose();
+    _weightCtrl.dispose();
+    _heightCtrl.dispose();
+    _ldlCtrl.dispose();
+    _hdlCtrl.dispose();
+    _tgCtrl.dispose();
+    _tcCtrl.dispose();
+    super.dispose();
   }
 
   void _scanBukuRekod() async {
@@ -78,17 +81,18 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
       setState(() {
         _isScanning = false;
         // Auto fill realistic high-risk data
-        _data['age'] = 58;
-        _data['weight'] = 82.0;
-        _data['height'] = 165.0;
+        _ageCtrl.text = '58';
+        _weightCtrl.text = '82.0';
+        _heightCtrl.text = '165.0';
+        
+        _tcCtrl.text = '240.0';
+        _ldlCtrl.text = '160.0';
+        _hdlCtrl.text = '35.0';
+        _tgCtrl.text = '225.0';
+
         _data['med_hbp'] = true;
         _data['diet_fried'] = '2'; // Often
         _data['exercise'] = '0'; // Sedentary
-        _data['tc'] = 240.0;
-        _data['ldl'] = 160.0;
-        _data['hdl'] = 35.0;
-        _data['tg'] = 225.0;
-        _calculateBMI();
       });
       
       if (mounted) {
@@ -103,6 +107,22 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
   void _submitData() async {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
+
+    // Collect variables
+    _data['age'] = int.tryParse(_ageCtrl.text) ?? 30;
+    double weight = double.tryParse(_weightCtrl.text) ?? 70.0;
+    double height = double.tryParse(_heightCtrl.text) ?? 170.0;
+    _data['weight'] = weight;
+    _data['height'] = height;
+    
+    if (height > 0) {
+      _data['bmi'] = weight / ((height / 100) * (height / 100));
+    }
+
+    _data['tc'] = double.tryParse(_tcCtrl.text);
+    _data['ldl'] = double.tryParse(_ldlCtrl.text);
+    _data['hdl'] = double.tryParse(_hdlCtrl.text);
+    _data['tg'] = double.tryParse(_tgCtrl.text);
 
     bool hasEmergency = _data['symptom_chest_pain'] || _data['symptom_stroke'] || _data['symptom_sob'] || _data['symptom_abdomen'];
     bool hasLipids = _data['tc'] != null && _data['ldl'] != null && _data['hdl'] != null && _data['tg'] != null;
@@ -192,6 +212,26 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Safety Banner
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 24),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFFBEB),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFFEF3C7)),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 20),
+                  SizedBox(width: 8),
+                  Text('Safety Notice: This app does not diagnose disease or replace a doctor.', style: TextStyle(color: Color(0xFFD97706), fontWeight: FontWeight.w500)),
+                ],
+              ),
+            ),
+            
             // AI Scanner Feature
             Container(
               width: double.infinity,
@@ -250,11 +290,9 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                                   children: [
                                     Expanded(
                                       child: TextFormField(
-                                        key: ValueKey('age_${_data['age']}'),
-                                        initialValue: _data['age'].toString(),
+                                        controller: _ageCtrl,
                                         decoration: const InputDecoration(labelText: 'Age', border: OutlineInputBorder()),
                                         keyboardType: TextInputType.number,
-                                        onChanged: (v) => _data['age'] = int.tryParse(v) ?? 30,
                                       ),
                                     ),
                                     const SizedBox(width: 16),
@@ -276,21 +314,17 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                                   children: [
                                     Expanded(
                                       child: TextFormField(
-                                        key: ValueKey('weight_${_data['weight']}'),
+                                        controller: _weightCtrl,
                                         decoration: const InputDecoration(labelText: 'Weight (kg)', border: OutlineInputBorder()),
                                         keyboardType: TextInputType.number,
-                                        initialValue: _data['weight'].toString(),
-                                        onChanged: (v) { _data['weight'] = double.tryParse(v) ?? 70.0; _calculateBMI(); },
                                       ),
                                     ),
                                     const SizedBox(width: 16),
                                     Expanded(
                                       child: TextFormField(
-                                        key: ValueKey('height_${_data['height']}'),
+                                        controller: _heightCtrl,
                                         decoration: const InputDecoration(labelText: 'Height (cm)', border: OutlineInputBorder()),
                                         keyboardType: TextInputType.number,
-                                        initialValue: _data['height'].toString(),
-                                        onChanged: (v) { _data['height'] = double.tryParse(v) ?? 170.0; _calculateBMI(); },
                                       ),
                                     ),
                                   ],
@@ -383,41 +417,33 @@ class _AssessmentScreenState extends State<AssessmentScreen> {
                     children: [
                       Expanded(
                         child: TextFormField(
-                          key: ValueKey('ldl_${_data['ldl']}'),
-                          initialValue: _data['ldl']?.toString(),
+                          controller: _ldlCtrl,
                           decoration: const InputDecoration(labelText: 'LDL-C', border: OutlineInputBorder()), 
                           keyboardType: TextInputType.number, 
-                          onChanged: (v) => _data['ldl'] = double.tryParse(v)
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: TextFormField(
-                          key: ValueKey('hdl_${_data['hdl']}'),
-                          initialValue: _data['hdl']?.toString(),
+                          controller: _hdlCtrl,
                           decoration: const InputDecoration(labelText: 'HDL-C', border: OutlineInputBorder()), 
                           keyboardType: TextInputType.number, 
-                          onChanged: (v) => _data['hdl'] = double.tryParse(v)
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: TextFormField(
-                          key: ValueKey('tg_${_data['tg']}'),
-                          initialValue: _data['tg']?.toString(),
+                          controller: _tgCtrl,
                           decoration: const InputDecoration(labelText: 'Triglycerides', border: OutlineInputBorder()), 
                           keyboardType: TextInputType.number, 
-                          onChanged: (v) => _data['tg'] = double.tryParse(v)
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: TextFormField(
-                          key: ValueKey('tc_${_data['tc']}'),
-                          initialValue: _data['tc']?.toString(),
+                          controller: _tcCtrl,
                           decoration: const InputDecoration(labelText: 'Total Chol', border: OutlineInputBorder()), 
                           keyboardType: TextInputType.number, 
-                          onChanged: (v) => _data['tc'] = double.tryParse(v)
                         ),
                       ),
                     ],
