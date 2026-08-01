@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../widgets/animated_entrance.dart';
+import '../widgets/fade_slide_page_route.dart';
 import 'main_layout.dart';
 
 class DoctorLoginScreen extends StatefulWidget {
@@ -22,7 +24,7 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
 
     if (user != null) {
       if (mounted) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainLayout(role: 'Doctor')));
+        Navigator.pushReplacement(context, FadeSlidePageRoute(builder: (_) => const MainLayout(role: 'Doctor')));
       }
     } else {
       if (mounted) {
@@ -42,7 +44,8 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
         foregroundColor: const Color(0xFF0F172A),
       ),
       body: Center(
-        child: Container(
+        child: AnimatedEntrance(
+          child: Container(
           width: 400,
           padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
@@ -83,12 +86,13 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   onPressed: _isLoading ? null : _login,
-                  child: _isLoading 
+                  child: _isLoading
                     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                     : const Text('Sign In', style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
               )
             ],
+          ),
           ),
         ),
       ),

@@ -91,7 +91,21 @@ class _MainLayoutState extends State<MainLayout> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(_getTitle(), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF0F172A))),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                transitionBuilder: (child, animation) => FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(animation),
+                    child: child,
+                  ),
+                ),
+                child: Text(
+                  _getTitle(),
+                  key: ValueKey(_getTitle()),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
+                ),
+              ),
               if (isDesktop)
                 Row(
                   children: [
@@ -129,8 +143,20 @@ class _MainLayoutState extends State<MainLayout> {
         // Dynamic Content
         Expanded(
           child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: _buildDynamicContent(),
+            duration: const Duration(milliseconds: 320),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(begin: const Offset(0, 0.03), end: Offset.zero).animate(animation),
+                child: child,
+              ),
+            ),
+            child: KeyedSubtree(
+              key: ValueKey('${widget.role}-$_selectedIndex-${_lastResult == null}'),
+              child: _buildDynamicContent(),
+            ),
           ),
         ),
       ],

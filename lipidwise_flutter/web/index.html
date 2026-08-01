@@ -31,8 +31,43 @@
 
   <title>lipidwise_flutter</title>
   <link rel="manifest" href="manifest.json">
-</head>
-<body>
+
+  <!--
+    Real, on-device OCR engine (Tesseract.js) used by the Smart Medical
+    Record Scanner. This actually reads pixels from the photo/file the user
+    provides and returns recognized text — nothing here is pre-scripted.
+    See lib/services/ocr_service_web.dart for the Dart side of the bridge.
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+  <script>
+    // Lazily created and reused so repeat scans don't reload the OCR worker.
+    window._lipidwiseOcrWorkerPromise = null;
+
+    function _lipidwiseGetOcrWorker() {
+      if (!window._lipidwiseOcrWorkerPromise) {
+        window._lipidwiseOcrWorkerPromise = Tesseract.createWorker('eng');
+      }
+      return window._lipidwiseOcrWorkerPromise;
+    }
+
+    // Called from Dart via dart:js_interop (see ocr_service_web.dart).
+    // Takes a data: URL of the captured/selected image and resolves with
+    // the raw text Tesseract actually recognized in that image.
+    window.lipidwiseRunOcr = function (dataUrl) {
+      return _lipidwiseGetOcrWorker()
+        .then(function (worker) {
+          return worker.recognize(dataUrl);
+        })
+        .then(function (result) {
+          return (result && result.data && result.data.text) || '';
+        })
+        .catch(function (err) {
+          console.error('LipidWise OCR error:', err);
+          throw err;
+        });
+    };
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../widgets/animated_entrance.dart';
+import '../widgets/fade_slide_page_route.dart';
 import 'landing_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -16,7 +18,7 @@ class SettingsScreen extends StatelessWidget {
       if (context.mounted) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const LandingScreen()),
+          FadeSlidePageRoute(builder: (_) => const LandingScreen()),
           (Route<dynamic> route) => false,
         );
       }
@@ -27,10 +29,14 @@ class SettingsScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Account Settings', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+          AnimatedEntrance(
+            child: const Text('Account Settings', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+          ),
           const SizedBox(height: 24),
-          
-          Card(
+
+          AnimatedEntrance(
+          delay: const Duration(milliseconds: 100),
+          child: Card(
             color: Colors.white,
             elevation: 0,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Color(0xFFE2E8F0))),
@@ -71,7 +77,8 @@ class SettingsScreen extends StatelessWidget {
                 ],
               ),
             ),
-          )
+          ),
+          ),
         ],
       ),
     );
