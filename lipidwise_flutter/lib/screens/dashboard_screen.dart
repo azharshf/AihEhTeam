@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-class DashboardScreen extends StatefulWidget {
+import 'chat_screen.dart';class DashboardScreen extends StatefulWidget {
   final Map<String, dynamic> result;
   final String role;
   
@@ -199,13 +198,39 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         onPressed: () {
           showDialog(
             context: context,
-            builder: (ctx) => AlertDialog(
+            builder: (ctx) => Dialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              title: const Row(children: [Icon(Icons.smart_toy_rounded, color: Color(0xFF2563EB)), SizedBox(width: 12), Text('LipidWise AI Coach')]),
-              content: const Text('Hello! Ask me any questions about 2026 ACC/AHA guidelines, PREVENT risk, or healthy food swaps.\n\n(This chatbot feature is simulated for the hackathon prototype)'),
-              actions: [
-                TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Close'))
-              ],
+              clipBehavior: Clip.antiAlias,
+              child: SizedBox(
+                width: 450,
+                height: 650,
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Row(children: [
+                            Icon(Icons.smart_toy_rounded, color: Color(0xFF2563EB)), 
+                            SizedBox(width: 12), 
+                            Text('LipidWise AI Coach', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)))
+                          ]),
+                          IconButton(
+                            icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)), 
+                            onPressed: () => Navigator.pop(ctx),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Expanded(child: ChatScreen()),
+                  ],
+                ),
+              ),
             ),
           );
         },
